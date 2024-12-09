@@ -1,0 +1,124 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-09 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: data/scripts/upgrade.php:32 Module.php:43
+#, php-format
+msgid "The module %1$s should be upgraded to version %2$s or later."
+msgstr ""
+
+#: src/Controller/LoginController.php:141
+msgid "Ajax login form is not implemented."
+msgstr ""
+
+#: src/Controller/LoginController.php:227
+msgid "Invalid code"
+msgstr ""
+
+#: src/Controller/LoginController.php:270
+msgid "Check your input for invalid data."
+msgstr ""
+
+#: src/Controller/LoginController.php:284
+msgid "An internal error has occurred."
+msgstr ""
+
+#: view/omeka/login/login-token.phtml:14
+msgid "Log in (2FA)"
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:257
+msgid "An error occurred when the code was sent by email. Try again later."
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:260
+msgid "[TwoFactorAuth] An error occurred when the code was sent by email."
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:273
+msgid "Fill the second form with the code received by email to log in"
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:290
+msgid "The code is missing."
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:301
+msgid "An error occurred. Retry to log in."
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:350
+msgid "The message has no subject, content or recipient."
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:413
+msgid ""
+"Error when sending email. Arguments:\n"
+"{json}"
+msgstr ""
+
+#: src/Authentication/Adapter/TokenAdapter.php:122
+msgid "Missing two-factor authentication code."
+msgstr ""
+
+#: src/Authentication/Adapter/TokenAdapter.php:138
+msgid "Invalid or expired code."
+msgstr ""
+
+#: src/Form/ConfigForm.php:18
+msgid "Force all users to use 2FA"
+msgstr ""
+
+#: src/Form/ConfigForm.php:28
+msgid "Expiration of token (seconds)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:42
+msgid "Subject of the email sent to user"
+msgstr ""
+
+#: src/Form/ConfigForm.php:43 src/Form/ConfigForm.php:55
+msgid ""
+"Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, "
+"{email}, {name}, {token}, {code}."
+msgstr ""
+
+#: src/Form/ConfigForm.php:47 config/module.config.php:54
+msgid "[{site_title}] {token} is your code to log in"
+msgstr ""
+
+#: src/Form/ConfigForm.php:54
+msgid "Text of the email"
+msgstr ""
+
+#: src/Form/ConfigForm.php:59 config/module.config.php:55
+msgid ""
+"Hi {user_name},\n"
+"The token to copy-paste to log in on {site_title} is:\n"
+"{token}\n"
+"Good browsing!\n"
+"If you did not request this email, please disregard it."
+msgstr ""
+
+#: src/Form/ConfigForm.php:73
+msgid "Use a popup dialog for second step"
+msgstr ""
+
+#: src/Form/UserSettingsFieldset.php:18
+msgid "Enable two-factor authentication with a code sent by email"
+msgstr ""
