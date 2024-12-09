@@ -77,7 +77,8 @@ class TokenAdapter extends AbstractAdapter
         EntityManager $entityManager,
         EntityRepository $tokenRepository,
         EntityRepository $userRepository,
-        UserSettings $userSettings
+        UserSettings $userSettings,
+        int $expirationDuration
     ) {
         $this->realAdapter = $realAdapter;
         $this->connection = $connection;
@@ -85,6 +86,7 @@ class TokenAdapter extends AbstractAdapter
         $this->tokenRepository = $tokenRepository;
         $this->userRepository = $userRepository;
         $this->userSettings = $userSettings;
+        $this->expirationDuration = $expirationDuration;
     }
 
     public function authenticate()

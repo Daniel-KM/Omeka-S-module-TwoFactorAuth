@@ -27,6 +27,7 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            Form\ConfigForm::class => Form\ConfigForm::class,
             Form\TokenForm::class => Form\TokenForm::class,
             Form\UserSettingsFieldset::class => Form\UserSettingsFieldset::class,
         ],
@@ -42,6 +43,9 @@ return [
         ],
     ],
     'twofactorauth' => [
+        'config' => [
+            'twofactorauth_expiration_duration' => 1200,
+        ],
         'user_settings' => [
             'twofactorauth_active' => false,
         ],

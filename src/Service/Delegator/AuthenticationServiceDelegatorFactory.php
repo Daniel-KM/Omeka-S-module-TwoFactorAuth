@@ -32,6 +32,8 @@ class AuthenticationServiceDelegatorFactory implements DelegatorFactoryInterface
             return $authenticationService;
         }
 
+        $settings = $services->get('Omeka\Settings');
+
         $entityManager = $services->get('Omeka\EntityManager');
         $tokenAdapter = new TokenAdapter(
             $adapter,
@@ -39,7 +41,8 @@ class AuthenticationServiceDelegatorFactory implements DelegatorFactoryInterface
             $services->get('Omeka\EntityManager'),
             $entityManager->getRepository(TfaToken::class),
             $entityManager->getRepository(User::class),
-            $services->get('Omeka\Settings\User')
+            $services->get('Omeka\Settings\User'),
+            (int) $settings->get('twofactorauth_expiration_duration') ?: 1200
         );
 
         $storage = $authenticationService->getStorage();
