@@ -7,6 +7,7 @@ if (!class_exists(\Common\TraitModule::class)) {
 }
 
 use Common\TraitModule;
+use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\ModuleManager\ModuleManager;
 use Omeka\Module\AbstractModule;
@@ -53,5 +54,24 @@ class Module extends AbstractModule
             'form.add_elements',
             [$this, 'handleUserSettings']
         );
+    }
+
+    public function handleUserSettings(Event $event): void
+    {
+        $services = $this->getServiceLocator();
+        if ($services->get('Omeka\Settings')->get('twofactorauth_force_2fa')) {
+            return;
+        }
+
+        /** @var \Omeka\Mvc\Status $status */
+        $status = $services->get('Omeka\Status');
+        if ($status->isAdminRequest()) {
+            /** @var \Laminas\Router\Http\RouteMatch $routeMatch */
+            $routeMatch = $status->getRouteMatch();
+            if (!in_array($routeMatch->getParam('controller'), ['Omeka\Controller\Admin\User', 'user'])) {
+                return;
+            }
+            $this->handleAnySettings($event, 'user_settings');
+        }
     }
 }

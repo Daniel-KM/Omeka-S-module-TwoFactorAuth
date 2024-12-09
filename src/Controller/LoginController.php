@@ -80,7 +80,7 @@ class LoginController extends OmekaLoginController
                 }
                 $requireSecondFactor = $user
                     ? $adapter->requireSecondFactor($user)
-                    : false;
+                    : (bool) $this->settings()->get('twofactorauth_force_2fa');
 
                 if (!$requireSecondFactor) {
                     // This is simpler to use real login controller even if

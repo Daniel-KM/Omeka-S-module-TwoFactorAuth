@@ -44,6 +44,7 @@ return [
     ],
     'twofactorauth' => [
         'config' => [
+            'twofactorauth_force_2fa' => false,
             'twofactorauth_expiration_duration' => 1200,
         ],
         'user_settings' => [

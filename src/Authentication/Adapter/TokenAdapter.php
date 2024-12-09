@@ -71,6 +71,11 @@ class TokenAdapter extends AbstractAdapter
      */
     protected $expirationDuration = 1200;
 
+    /**
+     * @var bool
+     */
+    protected $force2fa = false;
+
     public function __construct(
         AuthAdapterInterface $realAdapter,
         Connection $connection,
@@ -78,7 +83,8 @@ class TokenAdapter extends AbstractAdapter
         EntityRepository $tokenRepository,
         EntityRepository $userRepository,
         UserSettings $userSettings,
-        int $expirationDuration
+        int $expirationDuration,
+        bool $force2fa
     ) {
         $this->realAdapter = $realAdapter;
         $this->connection = $connection;
@@ -87,6 +93,7 @@ class TokenAdapter extends AbstractAdapter
         $this->userRepository = $userRepository;
         $this->userSettings = $userSettings;
         $this->expirationDuration = $expirationDuration;
+        $this->force2fa = $force2fa;
     }
 
     public function authenticate()
@@ -143,7 +150,8 @@ class TokenAdapter extends AbstractAdapter
      */
     public function requireSecondFactor(User $user): bool
     {
-        return (bool) $this->userSettings->get('twofactorauth_active', false, $user->getId());
+        return $this->force2fa
+            || $this->userSettings->get('twofactorauth_active', false, $user->getId());
     }
 
     public function getRealAdapter(): AuthAdapterInterface

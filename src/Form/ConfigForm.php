@@ -11,6 +11,16 @@ class ConfigForm extends Form
     {
         $this
             ->add([
+                'name' => 'twofactorauth_force_2fa',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Force all users to use 2FA', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'twofactorauth_force_2fa',
+                ],
+            ])
+            ->add([
                 'name' => 'twofactorauth_expiration_duration',
                 'type' => Element\Number::class,
                 'options' => [
