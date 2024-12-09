@@ -8,6 +8,11 @@ return [
             dirname(__DIR__) . '/view',
         ],
     ],
+    'form_elements' => [
+        'invokables' => [
+            Form\UserSettingsFieldset::class => Form\UserSettingsFieldset::class,
+        ],
+    ],
     'translator' => [
         'translation_file_patterns' => [
             [
