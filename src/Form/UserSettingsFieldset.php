@@ -15,7 +15,7 @@ class UserSettingsFieldset extends Fieldset
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'element_group' => 'user_settings',
-                    'label' => 'Enable two-factor authentication with a code sent by mail', // @translate
+                    'label' => 'Enable two-factor authentication with a code sent by email', // @translate
                 ],
                 'attributes' => [
                     'id' => 'twofactorauth_active',

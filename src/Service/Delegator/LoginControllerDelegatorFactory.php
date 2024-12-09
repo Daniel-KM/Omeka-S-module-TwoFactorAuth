@@ -25,8 +25,9 @@ class LoginControllerDelegatorFactory implements DelegatorFactoryInterface
 
         return new LoginController(
             $loginController,
+            $services->get('Omeka\AuthenticationService'),
             $services->get('Omeka\EntityManager'),
-            $services->get('Omeka\AuthenticationService')
+            $services->get('Config')['twofactorauth']
         );
     }
 }

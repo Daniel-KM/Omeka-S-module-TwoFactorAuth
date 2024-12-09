@@ -169,7 +169,7 @@ class TokenAdapter extends AbstractAdapter
         return $this->userRepository;
     }
 
-    public function createToken(User $user): self
+    public function createToken(User $user): TfaToken
     {
         // Don't use random integer directly to avoid repetitive digits.
         // But allow two times the same digit, except 0.
@@ -182,7 +182,7 @@ class TokenAdapter extends AbstractAdapter
             ->setCreated(new DateTime('now'));
         $this->entityManager->persist($token);
         $this->entityManager->flush();
-        return $this;
+        return $token;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace TwoFactorAuth\Form;
 
 use Laminas\Form\Element;
 use Laminas\Form\Form;
+use Omeka\Form\Element as OmekaElement;
 
 class ConfigForm extends Form
 {
@@ -31,6 +32,37 @@ class ConfigForm extends Form
                     'min' => 0,
                     'max' => 86400,
                     'step' => 1,
+                ],
+            ])
+
+            ->add([
+                'name' => 'twofactorauth_message_subject',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Subject of the email sent to user', // @translate
+                    'info' => 'Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, {email}, {name}, {token}.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'twofactorauth_message_subject',
+                    'placeholder' => '[{site_title}] {token} is your code to log in', // @translate
+                ],
+            ])
+            ->add([
+                'name' => 'twofactorauth_message_body',
+                'type' => OmekaElement\CkeditorInline::class,
+                'options' => [
+                    'label' => 'Text of the email', // @translate
+                    'info' => 'Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, {email}, {name}, {token}.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'twofactorauth_message_body',
+                    'placeholder' => <<<'TXT'
+                        Hi {user_name},
+                        The token to copy-paste to log in on {site_title} is:
+                        {token}
+                        Good browsing!
+                        If you did not request this email, please disregard it.
+                        TXT, // @translate
                 ],
             ])
         ;

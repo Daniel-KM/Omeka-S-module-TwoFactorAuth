@@ -46,6 +46,14 @@ return [
         'config' => [
             'twofactorauth_force_2fa' => false,
             'twofactorauth_expiration_duration' => 1200,
+            'twofactorauth_message_subject' => '[{site_title}] {token} is your code to log in', // @translate
+            'twofactorauth_message_body' => <<<'TXT'
+                Hi {user_name},
+                The token to copy-paste to log in on {site_title} is:
+                {token}
+                Good browsing!
+                If you did not request this email, please disregard it.
+                TXT, // @translate
         ],
         'user_settings' => [
             'twofactorauth_active' => false,
