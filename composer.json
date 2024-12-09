@@ -1,0 +1,30 @@
+{
+    "name": "daniel-km/omeka-s-module-two-factor-auth",
+    "description": "Module for Omeka S that adds a security mechanism with a second step to log in with a numeric code sent to user email.",
+    "type": "library",
+    "license": "CECILL-2.1",
+    "authors": [
+        {
+            "name": "Daniel Berthereau",
+            "email": "Daniel.packagist@Berthereau.net"
+        }
+    ],
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-TwoFactorAuth",
+    "support": {
+        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-TwoFactorAuth/-/issues",
+        "forum": "https://forum.omeka.org/"
+    },
+    "keywords": [
+        "Omeka S",
+        "module",
+        "authentication",
+        "security",
+        "two factor authentication",
+        "2FA"
+    ],
+    "autoload-dev": {
+        "psr-4": {
+            "TwoFactorAuthTest\\": "test/TwoFactorAuthTest/"
+        }
+    }
+}
