@@ -1,0 +1,24 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \TwoFactorAuth\Form\TokenForm $formToken
+ */
+
+$plugins = $this->getHelperPluginManager();
+$translate = $plugins->get('translate');
+?>
+
+<dialog id="login-token" class="popup popup-dialog dialog-login-token">
+    <div class="dialog-background">
+        <div class="dialog-panel">
+            <div class="dialog-header">
+                <button type="button" class="dialog-header-close-button" title="<?= $translate('Close') ?>" autofocus="autofocus">
+                    <span class="dialog-close">🗙</span>
+                </button>
+            </div>
+            <div class="dialog-contents">
+                <?= $this->form($formToken) ?>
+            </div>
+        </div>
+    </div>
+</dialog>

@@ -181,6 +181,22 @@ class TwoFactorLogin extends AbstractPlugin
             : false;
     }
 
+    public function processLogin(string $email, string $password): bool
+    {
+        $sessionManager = SessionContainer::getDefaultManager();
+        $sessionManager->regenerateId();
+        $adapter = $this->authenticationService->getAdapter();
+        $adapter->setIdentity($email);
+        $adapter->setCredential($password);
+        $result = $this->authenticationService->authenticate();
+        if (!$result->isValid()) {
+            return false;
+        }
+        $this->messenger->addSuccess('Successfully logged in'); // @translate
+        $this->eventManager->trigger('user.login', $this->authenticationService->getIdentity());
+        return true;
+    }
+
     public function validateLoginStep1(string $email, string $password): bool
     {
         $user = $this->userFromEmail($email);
@@ -305,7 +321,7 @@ class TwoFactorLogin extends AbstractPlugin
         // TODO Add a counter to avoid brute-force attack. For now, a sleep is enough.
         // Avoid brute-force attack.
         sleep(5);
-        $this->messenger->addError('The code is invalid.'); // @translate
+        $this->messenger->addError('Invalid code'); // @translate
         return false;
     }
 

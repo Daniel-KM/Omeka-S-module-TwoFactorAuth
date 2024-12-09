@@ -10,11 +10,13 @@ class TokenForm extends Form
     public function init(): void
     {
         $this
+            ->setAttribute('id', 'login-token-form')
+            ->setAttribute('class', 'login-token-form disable-unsaved-warning')
             ->add([
                 'name' => 'token_email',
                 'type' => Element\Number::class,
                 'options' => [
-                    'label' => 'Four-digit code', // @translate
+                    'label' => 'Code', // @translate
                 ],
                 'attributes' => [
                     'id' => 'token_email',

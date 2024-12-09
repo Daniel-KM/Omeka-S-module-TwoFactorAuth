@@ -1,0 +1,38 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Form\LoginForm $form
+ * @var \TwoFactorAuth\Form\TokenForm $formToken
+ */
+
+$plugins = $this->getHelperPluginManager();
+$url = $plugins->get('url');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
+$pageTitle = $plugins->get('pageTitle');
+$headLink = $plugins->get('headLink');
+$headScript = $plugins->get('headScript');
+
+$headLink
+    ->appendStylesheet($assetUrl('css/two-factor-auth.css', 'TwoFactorAuth'));
+$headScript
+    ->appendFile($assetUrl('js/two-factor-auth.js', 'TwoFactorAuth'), 'text/javascript', ['defer' => 'defer']);
+
+$this->htmlElement('body')->appendAttribute('class', 'login login-token');
+?>
+
+<?= $pageTitle($translate('Log in')) ?>
+
+<?= $this->messages() ?>
+
+<div class="login two-factor-auth-login">
+    <?= $this->form($form) ?>
+    <p class="forgot-password">
+        <?= $hyperlink($translate('Forgot password?'), $url('forgot-password')) ?>
+    </p>
+</div>
+
+<?php $this->trigger('view.login.after'); ?>
+
+<?= $formToken ? $this->partial('omeka/login/token-dialog') : '' ?>

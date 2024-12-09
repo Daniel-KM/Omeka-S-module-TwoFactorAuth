@@ -1,0 +1,29 @@
+/* Two-Factor Auth */
+
+@media all {
+    [hidden],
+    .hidden {
+        display: none;
+    }
+
+    .dialog-header {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .dialog-header-close-button {
+        display: block;
+        margin-left: auto;
+        padding: 0;
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .login-token-form .field {
+        min-width: 400px;
+    }
+    .field-meta label[for=token_email] {
+        min-width: 150px;
+    }
+}

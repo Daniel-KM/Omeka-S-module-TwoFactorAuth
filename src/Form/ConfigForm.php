@@ -8,7 +8,7 @@ use Omeka\Form\Element as OmekaElement;
 
 class ConfigForm extends Form
 {
-    public function init()
+    public function init(): void
     {
         $this
             ->add([
@@ -63,6 +63,17 @@ class ConfigForm extends Form
                         Good browsing!
                         If you did not request this email, please disregard it.
                         TXT, // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'twofactorauth_use_dialog',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Use a popup dialog for second step', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'twofactorauth_use_dialog',
                 ],
             ])
         ;

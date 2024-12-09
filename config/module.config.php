@@ -59,6 +59,7 @@ return [
                 Good browsing!
                 If you did not request this email, please disregard it.
                 TXT, // @translate
+            'twofactorauth_use_dialog' => false,
         ],
         'user_settings' => [
             'twofactorauth_active' => false,
