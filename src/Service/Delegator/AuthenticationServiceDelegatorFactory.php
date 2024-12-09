@@ -5,6 +5,7 @@ namespace TwoFactorAuth\Service\Delegator;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\DelegatorFactoryInterface;
 use Omeka\Authentication\Adapter\KeyAdapter;
+use Omeka\Entity\User;
 use TwoFactorAuth\Authentication\Adapter\TokenAdapter;
 use TwoFactorAuth\Entity\TfaToken;
 
@@ -32,11 +33,12 @@ class AuthenticationServiceDelegatorFactory implements DelegatorFactoryInterface
         }
 
         $entityManager = $services->get('Omeka\EntityManager');
-        $tfaTokenRepository = $entityManager->getRepository(TfaToken::class);
         $tokenAdapter = new TokenAdapter(
             $adapter,
             $services->get('Omeka\Connection'),
-            $tfaTokenRepository,
+            $services->get('Omeka\EntityManager'),
+            $entityManager->getRepository(TfaToken::class),
+            $entityManager->getRepository(User::class),
             $services->get('Omeka\Settings\User')
         );
 

@@ -10,13 +10,24 @@ return [
             ],
         ],
     ],
+    'controllers' => [
+        'delegators' => [
+            'Omeka\Controller\Login' => [
+                Service\Delegator\LoginControllerDelegatorFactory::class,
+            ],
+        ],
+    ],
     'view_manager' => [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
         ],
+        'controller_map' => [
+            Controller\LoginController::class => 'omeka/login',
+        ],
     ],
     'form_elements' => [
         'invokables' => [
+            Form\TokenForm::class => Form\TokenForm::class,
             Form\UserSettingsFieldset::class => Form\UserSettingsFieldset::class,
         ],
     ],

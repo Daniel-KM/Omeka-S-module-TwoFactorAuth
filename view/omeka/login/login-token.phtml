@@ -1,0 +1,15 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \TwoFactorAuth\Form\TokenForm $form
+ */
+
+$plugins = $this->getHelperPluginManager();
+$translate = $plugins->get('translate');
+
+$translate = $this->plugin('translate');
+$this->htmlElement('body')->appendAttribute('class', 'login login-token');
+?>
+
+<h1><?= $translate('Log in (2FA)') ?></h1>
+<?= $this->form($form) ?>

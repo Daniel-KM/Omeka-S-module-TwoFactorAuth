@@ -2,13 +2,17 @@
 
 namespace TwoFactorAuth\Authentication\Adapter;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Laminas\Authentication\Adapter\AbstractAdapter;
 use Laminas\Authentication\Adapter\AdapterInterface as AuthAdapterInterface;
 use Laminas\Authentication\Result;
-use Omeka\Authentication\Adapter\PasswordAdapter;
+use Omeka\Entity\User;
 use Omeka\Settings\UserSettings;
+use TwoFactorAuth\Entity\TfaToken;
 
 /**
  * Auth adapter for checking passwords through Doctrine.
@@ -16,15 +20,24 @@ use Omeka\Settings\UserSettings;
  * Same as omeka password manager, except a check of the two factor auth token.
  * Compatible with modules Guest and UserNames.
  *
+ * Because the steps are managed via the login controller, the token adapter is
+ * nearly like password adapter with a one-time automatically defined password.
+ * Keep the delegator to manage users who didn't activate 2fa.
+ *
  * @todo Check if the use of CallbackCheckAdapter is simpler.
  * @see https://docs.laminas.dev/laminas-authentication/adapter/dbtable/callback-check#adding-criteria-to-match
  */
-class TokenAdapter extends PasswordAdapter
+class TokenAdapter extends AbstractAdapter
 {
     /**
      * @var \Doctrine\DBAL\Connection
      */
     protected $connection;
+
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    protected $entityManager;
 
     /**
      * @var \Laminas\Authentication\Adapter\AdapterInterface
@@ -39,7 +52,12 @@ class TokenAdapter extends PasswordAdapter
     /**
      * @var \Doctrine\ORM\EntityRepository
      */
-    protected $tfaTokenRepository;
+    protected $tokenRepository;
+
+    /**
+     * @var \Doctrine\ORM\EntityRepository
+     */
+    protected $userRepository;
 
     /**
      * @var \Omeka\Settings\UserSettings
@@ -47,48 +65,48 @@ class TokenAdapter extends PasswordAdapter
     protected $userSettings;
 
     /**
+     * Number of seconds before expiration of tokens.
+     *
      * @var int
      */
-    protected $expirationDuration = 600;
+    protected $expirationDuration = 1200;
 
     public function __construct(
         AuthAdapterInterface $realAdapter,
         Connection $connection,
-        EntityRepository $tfaTokenRepository,
+        EntityManager $entityManager,
+        EntityRepository $tokenRepository,
+        EntityRepository $userRepository,
         UserSettings $userSettings
     ) {
         $this->realAdapter = $realAdapter;
         $this->connection = $connection;
-        $this->setTfaTokenRepository($tfaTokenRepository);
-        $this->setUserSettings($userSettings);
+        $this->entityManager = $entityManager;
+        $this->tokenRepository = $tokenRepository;
+        $this->userRepository = $userRepository;
+        $this->userSettings = $userSettings;
     }
 
     public function authenticate()
     {
-        // Manage the first factor.
+        // The first factor is already managed during the first step in the real
+        // adapter.
 
-        /** @var \Laminas\Authentication\Result $result */
-        $result = $this->realAdapter
-            ->setIdentity($this->getIdentity())
-            ->setCredential($this->getCredential())
-            ->authenticate();
-        if (!$result->isValid()) {
-            return $result;
+        $user = $this->userRepository->findOneBy(['email' => $this->identity]);
+        if (!$user || !$user->isActive()) {
+            return new Result(Result::FAILURE_IDENTITY_NOT_FOUND, null,
+                ['User not found.']);
         }
 
-        /** @var \Omeka\Entity\User $user */
-        $user = $result->getIdentity();
-
-         // Check if the user has set the two-factor authentication.
-        if (!$this->userSettings->get('twofactorauth_active', false, $user->getId())) {
-            return $result;
+        // Normally, this check is done in the first step.
+        // It is a quick one anyway.
+        if (!$this->requireSecondFactor($user)) {
+            return new Result(Result::SUCCESS, $user);
         }
 
         // Manage the second factor authentication.
 
-        // TODO Use Laminas request and check csrf (even if normally already checked during first step).
-        $token = $_POST['token'] ?? null;
-        if (!$token) {
+        if (!$this->credential) {
             return new Result(
                 Result::FAILURE_CREDENTIAL_INVALID,
                 null,
@@ -96,19 +114,15 @@ class TokenAdapter extends PasswordAdapter
             );
         }
 
-        // Clear old tokens first (to do it here simplify integration).
-        // Use a direct query, because there is no side effects neither log.
-        $sql = 'DELETE FROM `tfa_token` WHERE `created` < DATE_SUB(NOW(), INTERVAL :duration SECOND)';
-        $this->connection->prepare($sql)
-            ->bindValue('duration', $this->expirationDuration, ParameterType::INTEGER)
-            ->executeStatement();
+        // Clear old tokens first.
+        $this->cleanTokens();
 
-        // Check token.
-        $tfaToken = $this->tfaTokenRepository->findOneBy([
+        // Check token. A user may request multiple times the code.
+        $token = $this->tokenRepository->findOneBy([
             'user' => $user,
-            'token' => $token,
+            'token' => $this->credential,
         ]);
-        if (!$tfaToken) {
+        if (!$token) {
             return new Result(
                 Result::FAILURE_CREDENTIAL_INVALID,
                 null,
@@ -116,18 +130,71 @@ class TokenAdapter extends PasswordAdapter
             );
         }
 
-        return $result;
+        // Clear all tokens of the user.
+        $this->cleanTokens($user);
+
+        return new Result(Result::SUCCESS, $user);
     }
 
-    public function setTfaTokenRepository(EntityRepository $tfaTokenRepository): self
+    /**
+     * Check if the user has set the two-factor authentication.
+     */
+    public function requireSecondFactor(User $user): bool
     {
-        $this->tfaTokenRepository = $tfaTokenRepository;
+        return (bool) $this->userSettings->get('twofactorauth_active', false, $user->getId());
+    }
+
+    public function getRealAdapter(): AuthAdapterInterface
+    {
+        return $this->realAdapter;
+    }
+
+    public function getTokenRepository(): EntityRepository
+    {
+        return $this->tokenRepository;
+    }
+
+    public function getUserRepository(): EntityRepository
+    {
+        return $this->userRepository;
+    }
+
+    public function createToken(User $user): self
+    {
+        // Don't use random integer directly to avoid repetitive digits.
+        // But allow two times the same digit, except 0.
+        $available = '0123456789123456789';
+        $code = (int) substr(str_shuffle($available), 0, 4);
+        $token = new TfaToken();
+        $token
+            ->setUser($user)
+            ->setToken($code)
+            ->setCreated(new DateTime('now'));
+        $this->entityManager->persist($token);
+        $this->entityManager->flush();
         return $this;
     }
 
-    public function setUserSettings(UserSettings $userSettings): self
+    /**
+     * Expire old 2FA tokens and user tokens.
+     *
+     * To manage tokens here simplify integration.
+     */
+    public function cleanTokens(?User $user = null): self
     {
-        $this->userSettings = $userSettings;
+        // Use a direct query, because there is no side effects neither log.
+        $qb = $this->connection->createQueryBuilder();
+        $expr = $qb->expr();
+        $qb
+            ->delete('tfa_token')
+            ->where($expr->lt('created', 'DATE_SUB(NOW(), INTERVAL :duration SECOND)'))
+            ->setParameter('duration', $this->expirationDuration, ParameterType::INTEGER);
+        if ($user) {
+            $qb
+                ->orWhere($expr->eq('user_id', ':user_id'))
+                ->setParameter('user_id', $user->getId(), ParameterType::INTEGER);
+        }
+        $qb->execute();
         return $this;
     }
 }
