@@ -5,7 +5,9 @@
  */
 
 $plugins = $this->getHelperPluginManager();
+$url = $plugins->get('url');
 $translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
 $pageTitle = $plugins->get('pageTitle');
 
 $this->htmlElement('body')->appendAttribute('class', 'login login-token');
@@ -18,5 +20,9 @@ $this->htmlElement('body')->appendAttribute('class', 'login login-token');
     <?= $this->messages() ?>
 
     <?= $this->form($formToken) ?>
+
+    <p class="resend-token">
+        <?= $hyperlink($translate('Resend a code'), $url('login', [], ['query' => ['resend_token' => 1]], true), ['class' => 'resend-code']) ?>
+    </p>
 
 </div>

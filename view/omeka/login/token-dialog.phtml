@@ -5,6 +5,7 @@
  */
 
 $plugins = $this->getHelperPluginManager();
+$url = $plugins->get('url');
 $translate = $plugins->get('translate');
 ?>
 
@@ -18,6 +19,11 @@ $translate = $plugins->get('translate');
             </div>
             <div class="dialog-contents">
                 <?= $this->form($formToken) ?>
+            </div>
+            <div class="dialog-footer">
+                <button class="resend-code" type="button" data-url-resend-code="<?= $url('login') ?>">
+                    <?= $translate('Resend a code') ?>
+                </button>
             </div>
         </div>
     </div>

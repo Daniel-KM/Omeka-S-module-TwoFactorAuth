@@ -38,7 +38,7 @@
             var dialog = document.querySelector('dialog.popup-message');
             if (!dialog) {
                 dialog = `
-<dialog class="popup popup-dialog dialog-message popup-message">
+<dialog class="popup popup-dialog dialog-message popup-message" data-is-dynamic="1">
     <div class="dialog-background">
         <div class="dialog-panel">
             <div class="dialog-header">
@@ -148,10 +148,47 @@
                 });
         });
 
+        $(document).on('click', '.resend-code', function(e) {
+            // The button may be a button or a link.
+            // The button is the ajax way; the link reloads the page.
+            const button = $(this);
+            const urlResend = button.attr('data-url-resend-code') ? button.attr('data-url-resend-code') : button.attr('href');
+            if (button.element === 'A') {
+                window.location.href = urlResend + '?resend_token=1';
+                return;
+            }
+            $
+                .ajax({
+                    type: 'GET',
+                    url: urlResend,
+                    data: {
+                        resend_token: 1,
+                        ajax: 1,
+                    },
+                    beforeSend: beforeSpin(button),
+                })
+                .done(function(data) {
+                    let msg = data.data.message ? data.data.message : 'A new code was resent.';
+                    dialogMessage(msg, true);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    const data = xhr.responseJSON;
+                    // Error is a server error.
+                    let msg = data && data.status === 'error' && data.message && data.message.length ? data.message : 'An error occurred.';
+                    dialogMessage(msg, true);
+                })
+                .always(function () {
+                    afterSpin(button)
+                });
+        });
+
         $(document).on('click', '.dialog-header-close-button', function(e) {
             const dialog = this.closest('dialog.popup');
             if (dialog) {
                 dialog.close();
+                if (dialog.hasAttribute('data-is-dynamic') && dialog.getAttribute('data-is-dynamic')) {
+                    dialog.remove();
+                }
             } else {
                 $(this).closest('.popup').addClass('hidden').hide();
             }

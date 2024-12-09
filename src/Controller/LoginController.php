@@ -57,8 +57,15 @@ class LoginController extends OmekaLoginController
 
         // The TokenForm returns to the login action, so check it when needed.
         $request = $this->getRequest();
-        if ($request->isPost() && ($request->getPost('token_email') || $request->getPost('submit_token'))) {
+        $isPost = $request->isPost();
+        if ($isPost
+            && ($request->getPost('token_email') || $request->getPost('submit_token'))
+        ) {
             return $this->loginTokenAction();
+        }
+
+        if (!$isPost && $request->getQuery('resend_token')) {
+            return $this->resendTokenAction();
         }
 
         $form = $this->getForm(LoginForm::class);
@@ -136,9 +143,8 @@ class LoginController extends OmekaLoginController
             }
         }
 
-        // TODO Ajax main login form?
         if ($isAjax) {
-            return $this->jSend('error', [], $this->translate('Ajax login form is not implemented.')); // @translate
+            return $this->jSend('error', [], $this->translate('Ajax login form is not implemented here. Use Guest page instead.')); // @translate
         }
 
         $view = new ViewModel([
@@ -154,6 +160,7 @@ class LoginController extends OmekaLoginController
 
     /**
      * @see \Guest\Controller\Site\AnonymousController::loginToken()
+     * @see \Guest\Site\BlockLayout\Login::loginToken()
      * @see \TwoFactorAuth\Controller\LoginController::loginTokenAction()
      */
     public function loginTokenAction()
@@ -229,6 +236,47 @@ class LoginController extends OmekaLoginController
                 ]);
             }
         }
+
+        $view = new ViewModel([
+            'formToken' => $this->getForm(TokenForm::class),
+        ]);
+        return $view
+            ->setTemplate('omeka/login/login-token');
+    }
+
+    /**
+     * Adapted:
+     * @see \Guest\Controller\Site\AnonymousController::resendToken();
+     * @see \Guest\Site\BlockLayout\Login::resendToken()
+     * @see \TwoFactorAuth\Controller\LoginController::resendTokenAction();
+     */
+    protected function resendTokenAction()
+    {
+        $request = $this->getRequest();
+        $codeKey = $request->getQuery('resend_token');
+        if ($codeKey) {
+            $twoFactorLogin = $this->twoFactorLogin();
+            $result = $twoFactorLogin->resendToken();
+        } else {
+            $result = false;
+        }
+
+        $isAjax = $request->isXmlHttpRequest() || $request->getQuery('ajax');
+        if ($isAjax) {
+            if ($result) {
+                return $this->jSend('success', [
+                    'login' => null,
+                    'token_email' => null,
+                    'message' => $this->translate('A new code was resent.'), // @translate
+                ]);
+            } else {
+                return $this->jSend('error', [], $this->translate('Unable to send email.')); // @translate
+            }
+        }
+
+        $result
+            ? $this->messenger()->addSuccess('A new code was resent.')
+            :  $this->messenger()->addError('Unable to send email.');
 
         $view = new ViewModel([
             'formToken' => $this->getForm(TokenForm::class),

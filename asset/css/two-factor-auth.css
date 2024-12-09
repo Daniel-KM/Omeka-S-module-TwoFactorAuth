@@ -6,6 +6,12 @@
         display: none;
     }
 
+    .dialog-header,
+    .dialog-contents,
+    .dialog-bottom {
+        margin-bottom: 6px;
+    }
+
     .dialog-header {
         display: flex;
         justify-content: flex-end;

@@ -19,6 +19,7 @@ use Omeka\Mvc\Controller\Plugin\Translate;
 use Omeka\Settings\Settings;
 use Omeka\Settings\UserSettings;
 use Omeka\Stdlib\Mailer;
+use TwoFactorAuth\Entity\Token;
 
 class TwoFactorLogin extends AbstractPlugin
 {
@@ -192,6 +193,7 @@ class TwoFactorLogin extends AbstractPlugin
         if (!$result->isValid()) {
             return false;
         }
+        $this->messenger->clear();
         $this->messenger->addSuccess('Successfully logged in'); // @translate
         $this->eventManager->trigger('user.login', $this->authenticationService->getIdentity());
         return true;
@@ -228,30 +230,8 @@ class TwoFactorLogin extends AbstractPlugin
      */
     public function prepareLoginStep2(User $user): bool
     {
-        // Create token and send email.
-        $adapter = $this->authenticationService->getAdapter();
-        $token = $adapter
-            ->cleanTokens($user)
-            ->createToken($user);
-
-        $emailParams = [
-            'subject' => $this->settings->get('twofactorauth_message_subject')
-                ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_subject']),
-            'body' => $this->settings->get('twofactorauth_message_body')
-                ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_body']),
-            'to' => [
-                $user->getEmail() => $user->getName(),
-            ],
-            'map' => [
-                'user_email' => $user->getEmail(),
-                'user_name' => $user->getName(),
-                'token' => $token->getCode(),
-                'code' => $token->getCode(),
-            ],
-        ];
-
-        $result = $this->sendEmail($emailParams);
-
+        $token = $this->prepareToken($user);
+        $result = $this->sendToken($token);
         if (!$result) {
             $this->messenger->addError(
                 'An error occurred when the code was sent by email. Try again later.' // @translate
@@ -313,6 +293,7 @@ class TwoFactorLogin extends AbstractPlugin
         // Here, use the authentication service.
         $result = $this->authenticationService->authenticate();
         if ($result->isValid()) {
+            $this->messenger->clear();
             $this->messenger->addSuccess('Successfully logged in'); // @translate
             $this->eventManager->trigger('user.login', $this->authenticationService->getIdentity());
             return true;
@@ -323,6 +304,58 @@ class TwoFactorLogin extends AbstractPlugin
         sleep(5);
         $this->messenger->addError('Invalid code'); // @translate
         return false;
+    }
+
+    public function prepareToken(User $user): Token
+    {
+        // Create token and send email.
+        /** @var \TwoFactorAuth\Authentication\Adapter\TokenAdapter $adapter */
+        $adapter = $this->authenticationService->getAdapter();
+        return $adapter
+            ->cleanTokens($user)
+            ->createToken($user);
+    }
+
+    public function sendToken(Token $token): bool
+    {
+        $user = $token->getUser();
+
+        $emailParams = [
+            'subject' => $this->settings->get('twofactorauth_message_subject')
+                ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_subject']),
+            'body' => $this->settings->get('twofactorauth_message_body')
+                ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_body']),
+            'to' => [
+                $user->getEmail() => $user->getName(),
+            ],
+            'map' => [
+                'user_email' => $user->getEmail(),
+                'user_name' => $user->getName(),
+                'token' => $token->getCode(),
+                'code' => $token->getCode(),
+            ],
+        ];
+
+        return $this->sendEmail($emailParams);
+    }
+
+    public function resendToken(): bool
+    {
+        $sessionManager = SessionContainer::getDefaultManager();
+        $session = $sessionManager->getStorage();
+        $userEmail = $session->offsetGet('tfa_user_email');
+        if (!$userEmail) {
+            return false;
+        }
+
+        $user = $this->userFromEmail($userEmail);
+        if (!$user) {
+            return false;
+        }
+
+        // Don't log again: the possible issue with email is already logged.
+        $token = $this->prepareToken($user);
+        return $this->sendToken($token);
     }
 
     /**
