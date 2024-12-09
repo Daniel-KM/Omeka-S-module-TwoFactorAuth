@@ -179,6 +179,10 @@ class TokenAdapter extends AbstractAdapter
         $token
             ->setUser($user)
             ->setCode($code)
+            // Warning: DateTime('now') is the time of the php server, that may
+            // be different from the database server with utc or different time
+            // offset.
+            // Furthermore, Current_Timestamp is supported only with mysql.
             ->setCreated(new DateTime('now'));
         $this->entityManager->persist($token);
         $this->entityManager->flush();
@@ -197,7 +201,10 @@ class TokenAdapter extends AbstractAdapter
         $expr = $qb->expr();
         $qb
             ->delete('tfa_token')
-            ->where($expr->lt('created', 'DATE_SUB(NOW(), INTERVAL :duration SECOND)'))
+            // Don't use Current_Timestamp, but DateTime('now') everywhere to
+            // avoid issues with time offsets.
+            ->where($expr->lt('created', 'DATE_SUB(:current_timestamp, INTERVAL :duration SECOND)'))
+            ->setParameter('current_timestamp', (new DateTime('now'))->format('Y-m-d H:i:s'), ParameterType::STRING)
             ->setParameter('duration', $this->expirationDuration, ParameterType::INTEGER);
         if ($user) {
             $qb
