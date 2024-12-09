@@ -12,7 +12,7 @@ use Laminas\Authentication\Adapter\AdapterInterface as AuthAdapterInterface;
 use Laminas\Authentication\Result;
 use Omeka\Entity\User;
 use Omeka\Settings\UserSettings;
-use TwoFactorAuth\Entity\TfaToken;
+use TwoFactorAuth\Entity\Token;
 
 /**
  * Auth adapter for checking passwords through Doctrine.
@@ -129,7 +129,7 @@ class TokenAdapter extends AbstractAdapter
         // Check token. A user may request multiple times the code.
         $token = $this->tokenRepository->findOneBy([
             'user' => $user,
-            'token' => $this->credential,
+            'code' => $this->credential,
         ]);
         if (!$token) {
             return new Result(
@@ -169,16 +169,16 @@ class TokenAdapter extends AbstractAdapter
         return $this->userRepository;
     }
 
-    public function createToken(User $user): TfaToken
+    public function createToken(User $user): Token
     {
         // Don't use random integer directly to avoid repetitive digits.
         // But allow two times the same digit, except 0.
         $available = '0123456789123456789';
         $code = (int) substr(str_shuffle($available), 0, 4);
-        $token = new TfaToken();
+        $token = new Token();
         $token
             ->setUser($user)
-            ->setToken($code)
+            ->setCode($code)
             ->setCreated(new DateTime('now'));
         $this->entityManager->persist($token);
         $this->entityManager->flush();
@@ -186,7 +186,7 @@ class TokenAdapter extends AbstractAdapter
     }
 
     /**
-     * Expire old 2FA tokens and user tokens.
+     * Expire old 2FA tokens and user ones.
      *
      * To manage tokens here simplify integration.
      */

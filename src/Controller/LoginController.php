@@ -136,13 +136,14 @@ class LoginController extends OmekaLoginController
                         'map' => [
                             'user_email' => $user->getEmail(),
                             'user_name' => $user->getName(),
-                            'token' => $token->getToken(),
+                            'token' => $token->getCode(),
+                            'code' => $token->getCode(),
                         ],
                     ];
                     $result = $this->sendEmail($emailParams);
                     if (!$result) {
-                        $this->messenger()->addError('An error occurred when the token was sent by email. Try again later.'); // @translate
-                        $this->logger()->err('[TwoFactorAuth] An error occurred when the token was sent by email.'); // @translate
+                        $this->messenger()->addError('An error occurred when the code was sent by email. Try again later.'); // @translate
+                        $this->logger()->err('[TwoFactorAuth] An error occurred when the code was sent by email.'); // @translate
                         return $this->redirect()->toRoute('login');
                     }
 
@@ -225,7 +226,7 @@ class LoginController extends OmekaLoginController
                         ? $this->redirect()->toRoute('admin')
                         : $this->redirect()->toRoute('top');
                 } else {
-                    $this->messenger()->addError('The token is invalid.'); // @translate
+                    $this->messenger()->addError('The code is invalid.'); // @translate
                 }
             } else {
                 $this->messenger()->addFormErrors($form);

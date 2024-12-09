@@ -7,7 +7,7 @@ use Laminas\ServiceManager\Factory\DelegatorFactoryInterface;
 use Omeka\Authentication\Adapter\KeyAdapter;
 use Omeka\Entity\User;
 use TwoFactorAuth\Authentication\Adapter\TokenAdapter;
-use TwoFactorAuth\Entity\TfaToken;
+use TwoFactorAuth\Entity\Token;
 
 class AuthenticationServiceDelegatorFactory implements DelegatorFactoryInterface
 {
@@ -39,7 +39,7 @@ class AuthenticationServiceDelegatorFactory implements DelegatorFactoryInterface
             $adapter,
             $services->get('Omeka\Connection'),
             $services->get('Omeka\EntityManager'),
-            $entityManager->getRepository(TfaToken::class),
+            $entityManager->getRepository(Token::class),
             $entityManager->getRepository(User::class),
             $services->get('Omeka\Settings\User'),
             (int) $settings->get('twofactorauth_expiration_duration') ?: 1200,

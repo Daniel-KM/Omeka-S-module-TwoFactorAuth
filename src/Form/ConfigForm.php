@@ -40,7 +40,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Subject of the email sent to user', // @translate
-                    'info' => 'Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, {email}, {name}, {token}.', // @translate
+                    'info' => 'Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, {email}, {name}, {token}, {code}.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'twofactorauth_message_subject',
@@ -52,7 +52,7 @@ class ConfigForm extends Form
                 'type' => OmekaElement\CkeditorInline::class,
                 'options' => [
                     'label' => 'Text of the email', // @translate
-                    'info' => 'Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, {email}, {name}, {token}.', // @translate
+                    'info' => 'Possible placeholders: {main_title}, {main_url}, {site_title}, {site_url}, {email}, {name}, {token}, {code}.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'twofactorauth_message_body',

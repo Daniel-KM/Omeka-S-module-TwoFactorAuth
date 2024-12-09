@@ -11,8 +11,11 @@ use Omeka\Entity\User;
  * The token is removed once validated.
  *
  * @Entity
+ * @Table(
+ *     name="tfa_token"
+ * )
  */
-class TfaToken extends AbstractEntity
+class Token extends AbstractEntity
 {
     /**
      * @var int
@@ -48,7 +51,7 @@ class TfaToken extends AbstractEntity
      *     type="integer"
      * )
      */
-    protected $token;
+    protected $code;
 
     /**
      * @var DateTime
@@ -79,15 +82,15 @@ class TfaToken extends AbstractEntity
         return $this->user;
     }
 
-    public function setToken($token): self
+    public function setCode(int $code): self
     {
-        $this->token = $token;
+        $this->code = $code;
         return $this;
     }
 
-    public function getToken(): string
+    public function getCode(): int
     {
-        return $this->token;
+        return $this->code;
     }
 
     public function setCreated(DateTime $created): self
