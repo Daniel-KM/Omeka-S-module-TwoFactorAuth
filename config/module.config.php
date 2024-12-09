@@ -10,13 +10,6 @@ return [
             ],
         ],
     ],
-    'controllers' => [
-        'delegators' => [
-            'Omeka\Controller\Login' => [
-                Service\Delegator\LoginControllerDelegatorFactory::class,
-            ],
-        ],
-    ],
     'view_manager' => [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
@@ -30,6 +23,18 @@ return [
             Form\ConfigForm::class => Form\ConfigForm::class,
             Form\TokenForm::class => Form\TokenForm::class,
             Form\UserSettingsFieldset::class => Form\UserSettingsFieldset::class,
+        ],
+    ],
+    'controllers' => [
+        'delegators' => [
+            'Omeka\Controller\Login' => [
+                Service\Delegator\LoginControllerDelegatorFactory::class,
+            ],
+        ],
+    ],
+    'controller_plugins' => [
+        'factories' => [
+            'twoFactorLogin' => Service\ControllerPlugin\TwoFactorLoginFactory::class,
         ],
     ],
     'translator' => [
