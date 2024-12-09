@@ -50,6 +50,7 @@ TODO
 ----
 
 - [ ] Implement OTP to avoid mails.
+- [ ] Limit the tokens to a small number to avoid brute force (see [Lockout]).
 
 
 Warning
@@ -112,6 +113,7 @@ This module was built for the [digital library of Maison de Salins].
 [CAS]: https://github.com/biblibre/omeka-s-module-CAS
 [LDAP]: https://github.com/biblibre/omeka-s-module-Ldap
 [Single Sign-On]: https://gitlab.com/Daniel-KM/Omeka-S-module-SingleSignOn
+[Lockout]: https://gitlab.com/Daniel-KM/Omeka-S-module-Lockout
 [installing a module]: https://omeka.org/s/docs/user-manual/modules
 [TwoFactorAuth.zip]: https://github.com/Daniel-KM/Omeka-S-module-TwoFactorAuth/releases
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-TwoFactorAuth/issues
