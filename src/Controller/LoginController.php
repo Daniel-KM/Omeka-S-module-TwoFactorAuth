@@ -226,6 +226,9 @@ class LoginController extends OmekaLoginController
                         ? $this->redirect()->toRoute('admin')
                         : $this->redirect()->toRoute('top');
                 } else {
+                    // TODO Add a counter to avoid brute-force attack. For now, a sleep is enough.
+                    // Avoid brute-force attack.
+                    sleep(5);
                     $this->messenger()->addError('The code is invalid.'); // @translate
                 }
             } else {
