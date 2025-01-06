@@ -81,6 +81,7 @@
             }
             dialog.innerHTML = dialog.innerHTML.replace('{{ message }}', message);
             dialog.showModal();
+            $(dialog).trigger('o:dialog-opened');
         };
 
         /**
@@ -119,6 +120,7 @@
                         }
                     }
                     dialog.showModal();
+                    $(dialog).trigger('o:dialog-opened');
                 })
                 .fail(function (xhr, textStatus, errorThrown) {
                     const data = xhr.responseJSON;
