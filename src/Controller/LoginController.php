@@ -245,6 +245,28 @@ class LoginController extends OmekaLoginController
     }
 
     /**
+     * Override default logout to redirect to public site instead of login page.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Controller\LoginController::logoutAction()
+     */
+    public function logoutAction()
+    {
+        $this->auth->clearIdentity();
+
+        $sessionManager = SessionContainer::getDefaultManager();
+
+        $eventManager = $this->getEventManager();
+        $eventManager->trigger('user.logout');
+
+        $sessionManager->destroy();
+
+        $this->messenger()->addSuccess('Successfully logged out'); // @translate
+
+        return $this->redirect()->toRoute('top');
+    }
+
+    /**
      * Adapted:
      * @see \Guest\Controller\Site\AnonymousController::resendToken();
      * @see \Guest\Site\BlockLayout\Login::resendToken()
