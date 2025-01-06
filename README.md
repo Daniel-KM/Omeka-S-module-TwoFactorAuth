@@ -51,6 +51,7 @@ TODO
 
 - [ ] Implement OTP to avoid mails.
 - [ ] Limit the tokens to a small number to avoid brute force (see [Lockout]).
+- [ ] Implement dialog for forgot password.
 
 
 Warning
