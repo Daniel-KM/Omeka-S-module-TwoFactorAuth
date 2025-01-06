@@ -33,6 +33,27 @@
             element.show();
         };
 
+        /**
+         * Get the main message of jSend output, in particular for status fail.
+         */
+        const jSendMessage = function(data) {
+            if (typeof data !== 'object') {
+                return null;
+            }
+            if (data.message) {
+                return data.message;
+            }
+            if (!data.data) {
+                return null;
+            }
+            for (let value of Object.values(data.data)) {
+                if (typeof value === 'string' && value.length) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
         const dialogMessage = function (message, nl2br = false) {
             // Use a dialog to display a message, that should be escaped.
             var dialog = document.querySelector('dialog.popup-message');
@@ -64,6 +85,7 @@
 
         /**
          * Override submit of login form to manage optional login-token form.
+         * @see Guest to manage the same login form in sites.
          */
         $(document).on('submit', '#loginform', function(ev) {
             ev.preventDefault();
@@ -90,6 +112,11 @@
                         dialog = data.data.dialog;
                         $('body').append(dialog);
                         dialog = document.querySelector('dialog.dialog-2fa-token');
+                        if (!dialog) {
+                            let msg = jSendMessage(data);
+                            dialogMessage(msg ? msg : 'Check input', true);
+                            return;
+                        }
                     }
                     dialog.showModal();
                 })
@@ -97,7 +124,8 @@
                     const data = xhr.responseJSON;
                     if (data && data.status === 'fail') {
                         // Fail is always an email/password error here.
-                        dialogMessage(data.data.message, true);
+                        let msg = jSendMessage(data);
+                        dialogMessage(msg ? msg : 'Check input', true);
                         form[0].reset();
                     } else {
                         // Error is a server error (in particular cannot send mail).
@@ -134,8 +162,8 @@
                     const data = xhr.responseJSON;
                     if (data && data.status === 'fail') {
                         // Fail is always an email/password or token error here.
-                        let msg = data.data.token_email ? data.data.token_email : data.data.message ? data.data.message : 'Invalid code';
-                        dialogMessage(msg, true);
+                        let msg = jSendMessage(data);
+                        dialogMessage(msg ? msg : 'Check input', true);
                         form[0].reset();
                     } else {
                         // Error is a server error.
@@ -168,14 +196,14 @@
                     beforeSend: beforeSpin(button),
                 })
                 .done(function(data) {
-                    let msg = data.data.message ? data.data.message : 'A new code was resent.';
-                    dialogMessage(msg, true);
+                    let msg = jSendMessage(data);
+                    dialogMessage(msg ? msg : 'A new code was resent.', true);
                 })
                 .fail(function (xhr, textStatus, errorThrown) {
                     const data = xhr.responseJSON;
                     // Error is a server error.
-                    let msg = data && data.status === 'error' && data.message && data.message.length ? data.message : 'An error occurred.';
-                    dialogMessage(msg, true);
+                    let msg = jSendMessage(data);
+                    dialogMessage(msg ? msg : 'An error occurred.', true);
                 })
                 .always(function () {
                     afterSpin(button)
