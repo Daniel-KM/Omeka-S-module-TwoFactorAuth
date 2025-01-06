@@ -11,6 +11,7 @@ use Laminas\Mvc\Exception\RuntimeException;
 use Laminas\Session\Container as SessionContainer;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use Omeka\Api\Adapter\UserAdapter;
 use Omeka\Controller\LoginController as OmekaLoginController;
 use Omeka\Form\LoginForm;
 use ReflectionObject;
@@ -35,15 +36,22 @@ class LoginController extends OmekaLoginController
      */
     protected $configModule;
 
+    /**
+     * @var UserAdapter
+     */
+    protected $userAdapter;
+
     public function __construct(
         AbstractActionController $realLoginController,
         AuthenticationService $auth,
         EntityManager $entityManager,
+        UserAdapter $userAdapter,
         array $configModule
     ) {
         $this->realLoginController = $realLoginController;
         $this->auth = $auth;
         $this->entityManager = $entityManager;
+        $this->userAdapter = $userAdapter;
         $this->configModule = $configModule;
     }
 
@@ -93,7 +101,10 @@ class LoginController extends OmekaLoginController
                     if ($isAjax) {
                         $result = $twoFactorLogin->processLogin($email, $password);
                         return $result
-                            ? $this->jSend(self::SUCCESS, ['login' => true])
+                            ? $this->jSend(self::SUCCESS, [
+                                'login' => true,
+                                'user' => $this->userAdapter->getRepresentation($this->identity()),
+                            ])
                             : $this->jSend(self::FAIL, [
                                 'login' => $this->translatedMessages('error') ?: $this->translate('Email or password is invalid'), // @translate
                             ]);
@@ -127,7 +138,7 @@ class LoginController extends OmekaLoginController
                             ? $this->redirect()->toRoute('site/guest/anonymous', ['action' => 'login'], true)
                             : $this->redirect()->toRoute('login');
                     }
-                    // Go to second step.
+                    // Success login in first step in 2FA, so go to second step.
                     if ($isAjax) {
                         return $this->jSend(self::SUCCESS, [
                             'login' => null,
@@ -209,7 +220,11 @@ class LoginController extends OmekaLoginController
                         : $this->redirect()->toRoute('login');
                 } elseif ($result) {
                     if ($isAjax) {
-                        return $this->jSend(self::SUCCESS, ['login' => true]);
+                        $user = $this->identity();
+                        return $this->jSend(self::SUCCESS, [
+                            'login' => true,
+                            'user' => $this->userAdapter->getRepresentation($user),
+                        ]);
                     }
                     $sessionManager = SessionContainer::getDefaultManager();
                     $session = $sessionManager->getStorage();
