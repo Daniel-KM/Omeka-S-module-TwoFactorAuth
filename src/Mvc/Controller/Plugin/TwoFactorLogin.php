@@ -203,6 +203,7 @@ class TwoFactorLogin extends AbstractPlugin
     {
         $user = $this->userFromEmail($email);
         if (!$user) {
+            sleep(3);
             return false;
         }
 
@@ -214,6 +215,7 @@ class TwoFactorLogin extends AbstractPlugin
             ->setCredential($password)
             ->authenticate();
         if (!$result->isValid()) {
+            sleep(3);
             $this->messenger->addError(
                 'Email or password is invalid' // @translate
             );
@@ -300,8 +302,8 @@ class TwoFactorLogin extends AbstractPlugin
         }
 
         // TODO Add a counter to avoid brute-force attack. For now, a sleep is enough.
-        // Avoid brute-force attack.
-        sleep(5);
+        // Slow down the process to avoid brute force.
+        sleep(3);
         $this->messenger->addError('Invalid code'); // @translate
         return false;
     }
