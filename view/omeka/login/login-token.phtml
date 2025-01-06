@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \TwoFactorAuth\Form\TokenForm $formToken
+ * @var \TwoFactorAuth\Form\TokenForm $form
  */
 
 $plugins = $this->getHelperPluginManager();
@@ -19,7 +19,7 @@ $this->htmlElement('body')->appendAttribute('class', 'login login-token');
 
     <?= $this->messages() ?>
 
-    <?= $this->form($formToken) ?>
+    <?= $this->form($form) ?>
 
     <p class="resend-token">
         <?= $hyperlink($translate('Resend a code'), $url('login', [], ['query' => ['resend_token' => 1]], true), ['class' => 'resend-code']) ?>

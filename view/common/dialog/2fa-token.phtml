@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \TwoFactorAuth\Form\TokenForm $formToken
+ * @var \TwoFactorAuth\Form\TokenForm $form
  */
 
 $plugins = $this->getHelperPluginManager();
@@ -9,19 +9,21 @@ $url = $plugins->get('url');
 $translate = $plugins->get('translate');
 ?>
 
-<dialog id="login-token" class="popup popup-dialog dialog-login-token">
+<dialog id="2fa-token" class="popup popup-dialog dialog-2fa-token">
     <div class="dialog-background">
         <div class="dialog-panel">
             <div class="dialog-header">
                 <button type="button" class="dialog-header-close-button" title="<?= $translate('Close') ?>" autofocus="autofocus">
                     <span class="dialog-close">🗙</span>
                 </button>
+                <div class="dialog-messages">
+                </div>
             </div>
             <div class="dialog-contents">
-                <?= $this->form($formToken) ?>
+                <?= $this->form($form) ?>
             </div>
             <div class="dialog-footer">
-                <button class="resend-code" type="button" data-url-resend-code="<?= $url('login') ?>">
+                <button class="resend-code" type="button" data-url="<?= $url('login') ?>">
                     <?= $translate('Resend a code') ?>
                 </button>
             </div>

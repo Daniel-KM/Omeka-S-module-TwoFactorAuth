@@ -4,7 +4,7 @@
     $(document).ready(function() {
 
         /**
-         * @see ContactUs, Selection, TwoFactorAuth.
+         * @see ContactUs, Guest, Selection, TwoFactorAuth.
          */
 
         const beforeSpin = function (element) {
@@ -85,11 +85,11 @@
                     }
                     // Success for first step, but require a second step.
                     // Use the existing dialog if any, else use the one sent.
-                    let dialog = document.querySelector('dialog.dialog-login-token');
+                    let dialog = document.querySelector('dialog.dialog-2fa-token');
                     if (!dialog) {
                         dialog = data.data.dialog;
                         $('body').append(dialog);
-                        dialog = document.querySelector('dialog.dialog-login-token');
+                        dialog = document.querySelector('dialog.dialog-2fa-token');
                     }
                     dialog.showModal();
                 })
@@ -152,15 +152,15 @@
             // The button may be a button or a link.
             // The button is the ajax way; the link reloads the page.
             const button = $(this);
-            const urlResend = button.attr('data-url-resend-code') ? button.attr('data-url-resend-code') : button.attr('href');
+            const urlButton = button.attr('data-url') ? button.attr('data-url') : button.attr('href');
             if (button.element === 'A') {
-                window.location.href = urlResend + '?resend_token=1';
+                window.location.href = urlButton + '?resend_token=1';
                 return;
             }
             $
                 .ajax({
                     type: 'GET',
-                    url: urlResend,
+                    url: urlButton,
                     data: {
                         resend_token: 1,
                         ajax: 1,

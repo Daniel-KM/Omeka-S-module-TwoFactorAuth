@@ -35,4 +35,4 @@ $this->htmlElement('body')->appendAttribute('class', 'login login-token');
 
 <?php $this->trigger('view.login.after'); ?>
 
-<?= $formToken ? $this->partial('omeka/login/token-dialog') : '' ?>
+<?= $formToken ? $this->partial('common/dialog/2fa-token', ['form' => $formToken]) : '' ?>

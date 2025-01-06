@@ -128,8 +128,8 @@ class LoginController extends OmekaLoginController
                         return $this->jSend('success', [
                             'login' => null,
                             'token_email' => null,
-                            'dialog' => $this->viewHelpers()->get('partial')('omeka/login/token-dialog', [
-                                'formToken' => $this->getForm(TokenForm::class)->setAttribute('action', $this->url()->fromRoute('login')),
+                            'dialog' => $this->viewHelpers()->get('partial')('common/dialog/2fa-token', [
+                                'form' => $this->getForm(TokenForm::class)->setAttribute('action', $this->url()->fromRoute('login')),
                             ]),
                         ]);
                     }
@@ -159,6 +159,8 @@ class LoginController extends OmekaLoginController
     }
 
     /**
+     * @todo There is no route for login-token: for now, use login.
+     *
      * @see \Guest\Controller\Site\AnonymousController::loginToken()
      * @see \Guest\Site\BlockLayout\Login::loginToken()
      * @see \TwoFactorAuth\Controller\LoginController::loginTokenAction()
@@ -224,8 +226,8 @@ class LoginController extends OmekaLoginController
                 return $this->jSend('success', [
                     'login' => null,
                     'token_email' => null,
-                    'dialog' => $this->viewHelpers()->get('partial')('omeka/login/token-dialog', [
-                        'formToken' => $this->getForm(TokenForm::class)->setAttribute('action', $this->url()->fromRoute('login')),
+                    'dialog' => $this->viewHelpers()->get('partial')('common/dialog/2fa-token', [
+                        'form' => $this->getForm(TokenForm::class)->setAttribute('action', $this->url()->fromRoute('login')),
                     ]),
                 ]);
             } else {
@@ -238,7 +240,7 @@ class LoginController extends OmekaLoginController
         }
 
         $view = new ViewModel([
-            'formToken' => $this->getForm(TokenForm::class),
+            'form' => $this->getForm(TokenForm::class),
         ]);
         return $view
             ->setTemplate('omeka/login/login-token');
@@ -301,7 +303,7 @@ class LoginController extends OmekaLoginController
             :  $this->messenger()->addError('Unable to send email.');
 
         $view = new ViewModel([
-            'formToken' => $this->getForm(TokenForm::class),
+            'form' => $this->getForm(TokenForm::class),
         ]);
         return $view
             ->setTemplate('omeka/login/login-token');
