@@ -291,8 +291,7 @@ class LoginController extends OmekaLoginController
                 return $this->jSend('success', [
                     'login' => null,
                     'token_email' => null,
-                    'message' => $this->translate('A new code was resent.'), // @translate
-                ]);
+                ], $this->translate('A new code was resent.')); // @translate
             } else {
                 return $this->jSend('error', [], $this->translate('Unable to send email.')); // @translate
             }
@@ -312,8 +311,10 @@ class LoginController extends OmekaLoginController
     /**
      * Send output via json according to jSend.
      *
-     * For status fail and error, the error messages are taken from messenger
-     * messages  when not set.
+     * Notes:
+     * - Unlike jSend, any status can have a main message and a code.
+     * - For statuses fail and error, the error messages are taken from
+     *   messenger messages when not set.
      *
      * @see https://github.com/omniti-labs/jsend
      *
@@ -333,6 +334,12 @@ class LoginController extends OmekaLoginController
                     'status' => 'success',
                     'data' => $data,
                 ];
+                if (isset($message) && strlen($message)) {
+                    $json['message'] = $message;
+                }
+                if (isset($code)) {
+                    $json['code'] = $code;
+                }
                 break;
 
             case 'fail':
@@ -346,6 +353,12 @@ class LoginController extends OmekaLoginController
                     'status' => 'fail',
                     'data' => $data,
                 ];
+                if (isset($message) && strlen($message)) {
+                    $json['message'] = $message;
+                }
+                if (isset($code)) {
+                    $json['code'] = $code;
+                }
                 $httpStatusCode ??= Response::STATUS_CODE_400;
                 break;
 
@@ -361,7 +374,7 @@ class LoginController extends OmekaLoginController
                 if ($data) {
                     $json['data'] = $data;
                 }
-                if ($code) {
+                if (isset($code)) {
                     $json['code'] = $code;
                 }
                 $httpStatusCode ??= Response::STATUS_CODE_500;
