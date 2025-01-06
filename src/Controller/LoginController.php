@@ -318,8 +318,8 @@ class LoginController extends OmekaLoginController
         }
 
         $result
-            ? $this->messenger()->addSuccess('A new code was resent.')
-            :  $this->messenger()->addError('Unable to send email.');
+            ? $this->messenger()->addSuccess('A new code was resent.') // @translate
+            : $this->messenger()->addError('Unable to send email.'); // @translate
 
         $view = new ViewModel([
             'form' => $this->getForm(TokenForm::class),

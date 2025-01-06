@@ -91,12 +91,12 @@
         $(document).on('submit', '#loginform', function(ev) {
             ev.preventDefault();
             const form = $(this);
-            const urlLogin = form.attr('action') ? form.attr('action') : window.location.href;
+            const urlForm = form.attr('action') ? form.attr('action') : window.location.href;
             const submitButton = form.find('[type=submit]');
             $
                 .ajax({
                     type: 'POST',
-                    url: urlLogin,
+                    url: urlForm,
                     data: form.serialize(),
                     beforeSend: beforeSpin(submitButton),
                 })
@@ -146,12 +146,12 @@
         $(document).on('submit', '#login-token-form', function(ev) {
             ev.preventDefault();
             const form = $(this);
-            const urlLogin = form.attr('action') ? form.attr('action') : window.location.href;
+            const urlForm = form.attr('action') ? form.attr('action') : window.location.href;
             const submitButton = form.find('[type=submit]');
             $
                 .ajax({
                     type: 'POST',
-                    url: urlLogin,
+                    url: urlForm,
                     data: form.serialize(),
                     beforeSend: beforeSpin(submitButton),
                 })

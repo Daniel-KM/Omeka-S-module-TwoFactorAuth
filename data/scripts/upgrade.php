@@ -2,8 +2,6 @@
 
 namespace TwoFactorAuth;
 
-use Common\Stdlib\PsrMessage;
-
 /**
  * @var Module $this
  * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
