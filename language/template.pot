@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 00:00+0000\n"
+"POT-Creation-Date: 2025-01-06 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,56 +17,68 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:32 Module.php:43
+#: data/scripts/upgrade.php:30 Module.php:43
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: src/Controller/LoginController.php:141
-msgid "Ajax login form is not implemented."
+#: src/Controller/LoginController.php:163
+msgid "Ajax login form is not implemented here. Use Guest page instead."
 msgstr ""
 
-#: src/Controller/LoginController.php:227
+#: src/Controller/LoginController.php:256
 msgid "Invalid code"
 msgstr ""
 
-#: src/Controller/LoginController.php:270
+#: src/Controller/LoginController.php:314
+msgid "A new code was resent."
+msgstr ""
+
+#: src/Controller/LoginController.php:316
+msgid "Unable to send email."
+msgstr ""
+
+#: src/Controller/LoginController.php:369
 msgid "Check your input for invalid data."
 msgstr ""
 
-#: src/Controller/LoginController.php:284
+#: src/Controller/LoginController.php:388
 msgid "An internal error has occurred."
 msgstr ""
 
-#: view/omeka/login/login-token.phtml:14
+#: view/common/dialog/2fa-token.phtml:27 view/omeka/login/login-token.phtml:25
+msgid "Resend a code"
+msgstr ""
+
+#: view/omeka/login/login-token.phtml:16
 msgid "Log in (2FA)"
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:257
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:239
 msgid "An error occurred when the code was sent by email. Try again later."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:260
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:242
 msgid "[TwoFactorAuth] An error occurred when the code was sent by email."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:273
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:255
 msgid "Fill the second form with the code received by email to log in"
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:290
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:272
 msgid "The code is missing."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:301
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:283
 msgid "An error occurred. Retry to log in."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:350
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:385
 msgid "The message has no subject, content or recipient."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:413
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:448
 msgid ""
 "Error when sending email. Arguments:\n"
 "{json}"
@@ -121,4 +133,9 @@ msgstr ""
 
 #: src/Form/UserSettingsFieldset.php:18
 msgid "Enable two-factor authentication with a code sent by email"
+msgstr ""
+
+#: src/Controller/LoginController.php:403
+#, php-format
+msgid "The status \"%s\" is not supported by jSend."
 msgstr ""
