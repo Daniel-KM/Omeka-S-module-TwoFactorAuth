@@ -7,6 +7,7 @@ use Laminas\Authentication\AuthenticationService;
 use Laminas\Http\Response;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\Mvc\Exception\RuntimeException;
 use Laminas\Session\Container as SessionContainer;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
@@ -20,6 +21,10 @@ use TwoFactorAuth\Form\TokenForm;
  */
 class LoginController extends OmekaLoginController
 {
+    const ERROR = 'error';
+    const FAIL = 'fail';
+    const SUCCESS = 'success';
+
     /**
      * @var \Omeka\Controller\LoginController|\Guest\Controller\Site\AnonymousController|\Lockout\Controller\LoginController|\UserNames\Controller\LoginController
      */
@@ -88,10 +93,9 @@ class LoginController extends OmekaLoginController
                     if ($isAjax) {
                         $result = $twoFactorLogin->processLogin($email, $password);
                         return $result
-                            ? $this->jSend('success', ['login' => true])
-                            : $this->jSend('fail', [
-                                'login' => false,
-                                'message' => $this->translatedMessages('error') ?: $this->translate('Email or password is invalid'), // @translate
+                            ? $this->jSend(self::SUCCESS, ['login' => true])
+                            : $this->jSend(self::FAIL, [
+                                'login' => $this->translatedMessages('error') ?: $this->translate('Email or password is invalid'), // @translate
                             ]);
                     }
                     // Services must be injected in the real login controller.
@@ -117,7 +121,7 @@ class LoginController extends OmekaLoginController
                     $result = $twoFactorLogin->prepareLoginStep2($user);
                     if (!$result) {
                         if ($isAjax) {
-                            return $this->jSend('error');
+                            return $this->jSend(self::ERROR);
                         }
                         return class_exists('Guest\Module')
                             ? $this->redirect()->toRoute('site/guest/anonymous', ['action' => 'login'], true)
@@ -125,7 +129,7 @@ class LoginController extends OmekaLoginController
                     }
                     // Go to second step.
                     if ($isAjax) {
-                        return $this->jSend('success', [
+                        return $this->jSend(self::SUCCESS, [
                             'login' => null,
                             'token_email' => null,
                             'dialog' => $this->viewHelpers()->get('partial')('common/dialog/2fa-token', [
@@ -144,7 +148,8 @@ class LoginController extends OmekaLoginController
         }
 
         if ($isAjax) {
-            return $this->jSend('error', [], $this->translate('Ajax login form is not implemented here. Use Guest page instead.')); // @translate
+            return $this->jSend(self::ERROR, null,
+                $this->translate('Ajax login form is not implemented here. Use Guest page instead.')); // @translate
         }
 
         $view = new ViewModel([
@@ -197,14 +202,14 @@ class LoginController extends OmekaLoginController
                 $result = $twoFactorLogin->validateLoginStep2($validatedData['token_email']);
                 if ($result === null) {
                     if ($isAjax) {
-                        return $this->jSend('error');
+                        return $this->jSend(self::ERROR);
                     }
                     return class_exists('Guest\Module')
                         ? $this->redirect()->toRoute('site/guest/anonymous', ['action' => 'login'], true)
                         : $this->redirect()->toRoute('login');
                 } elseif ($result) {
                     if ($isAjax) {
-                        return $this->jSend('success', ['login' => true]);
+                        return $this->jSend(self::SUCCESS, ['login' => true]);
                     }
                     $sessionManager = SessionContainer::getDefaultManager();
                     $session = $sessionManager->getStorage();
@@ -223,7 +228,7 @@ class LoginController extends OmekaLoginController
         if ($isAjax) {
             // IsFirst is normally not possible for json (already sent in loginAction).
             if ($isFirst) {
-                return $this->jSend('success', [
+                return $this->jSend(self::SUCCESS, [
                     'login' => null,
                     'token_email' => null,
                     'dialog' => $this->viewHelpers()->get('partial')('common/dialog/2fa-token', [
@@ -231,7 +236,7 @@ class LoginController extends OmekaLoginController
                     ]),
                 ]);
             } else {
-                return $this->jSend('fail', [
+                return $this->jSend(self::FAIL, [
                     'login' => null,
                     'token_email' => $this->translatedMessages('error') ?: $this->translate('Invalid code'), // @translate
                     // Don't resend dialog.
@@ -288,12 +293,12 @@ class LoginController extends OmekaLoginController
         $isAjax = $request->isXmlHttpRequest() || $request->getQuery('ajax');
         if ($isAjax) {
             if ($result) {
-                return $this->jSend('success', [
+                return $this->jSend(self::SUCCESS, [
                     'login' => null,
                     'token_email' => null,
                 ], $this->translate('A new code was resent.')); // @translate
             } else {
-                return $this->jSend('error', [], $this->translate('Unable to send email.')); // @translate
+                return $this->jSend(self::ERROR, null, $this->translate('Unable to send email.')); // @translate
             }
         }
 
@@ -323,15 +328,15 @@ class LoginController extends OmekaLoginController
      */
     protected function jSend(
         string $status,
-        array $data = [],
+        ?array $data = null,
         ?string $message = null,
-        ?int $code = null,
-        ?int $httpStatusCode = null
+        ?int $httpStatusCode = null,
+        ?int $code = null
     ) {
         switch ($status) {
-            case 'success':
+            case self::SUCCESS:
                 $json = [
-                    'status' => 'success',
+                    'status' => self::SUCCESS,
                     'data' => $data,
                 ];
                 if (isset($message) && strlen($message)) {
@@ -342,7 +347,7 @@ class LoginController extends OmekaLoginController
                 }
                 break;
 
-            case 'fail':
+            case self::FAIL:
                 if (!$data) {
                     $message = $message
                         ?: $this->translatedMessages('error')
@@ -350,7 +355,7 @@ class LoginController extends OmekaLoginController
                     $data = ['fail' => $message];
                 }
                 $json = [
-                    'status' => 'fail',
+                    'status' => self::FAIL,
                     'data' => $data,
                 ];
                 if (isset($message) && strlen($message)) {
@@ -362,13 +367,12 @@ class LoginController extends OmekaLoginController
                 $httpStatusCode ??= Response::STATUS_CODE_400;
                 break;
 
-            case 'error':
-            default:
+            case self::ERROR:
                 $message = $message
                     ?: $this->translatedMessages('error')
                     ?: $this->translate('An internal error has occurred.'); // @translate
                 $json = [
-                    'status' => 'error',
+                    'status' => self::ERROR,
                     'message' => $message,
                 ];
                 if ($data) {
@@ -379,6 +383,9 @@ class LoginController extends OmekaLoginController
                 }
                 $httpStatusCode ??= Response::STATUS_CODE_500;
                 break;
+
+            default:
+                throw new RuntimeException(sprintf('The status "%s" is not supported by jSend.', $status)); // @translate
         }
 
         if ($httpStatusCode) {
