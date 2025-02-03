@@ -16,6 +16,7 @@
                     span = $(element).next('span');
                 }
             }
+            // TODO Disable the button instead of hide and resize it to let place to spinner?
             element.hide();
             span.addClass('fas fa-sync fa-spin');
         };
