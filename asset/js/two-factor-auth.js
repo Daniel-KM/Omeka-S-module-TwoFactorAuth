@@ -90,6 +90,7 @@
          */
         $(document).on('submit', '#loginform', function(ev) {
             ev.preventDefault();
+            ev.stopImmediatePropagation();
             const form = $(this);
             const urlForm = form.attr('action') ? form.attr('action') : window.location.href;
             const submitButton = form.find('[type=submit]');
@@ -102,7 +103,7 @@
                 })
                 .done(function(data) {
                     // Success may be a single step login or a second step login.
-                    if (data.data && data.data.login === true) {
+                    if (data && data.data && data.data.login === true) {
                         window.location.reload();
                         return;
                     }
@@ -110,7 +111,7 @@
                     // Use the existing dialog if any, else use the one sent.
                     let dialog = document.querySelector('dialog.dialog-2fa-token');
                     if (!dialog) {
-                        dialog = data.data.dialog;
+                        dialog = data && data.data ? data.data.dialog : '';
                         $('body').append(dialog);
                         dialog = document.querySelector('dialog.dialog-2fa-token');
                         if (!dialog) {
@@ -145,6 +146,7 @@
          */
         $(document).on('submit', '#login-token-form', function(ev) {
             ev.preventDefault();
+            ev.stopImmediatePropagation();
             const form = $(this);
             const urlForm = form.attr('action') ? form.attr('action') : window.location.href;
             const submitButton = form.find('[type=submit]');
