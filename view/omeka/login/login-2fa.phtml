@@ -24,6 +24,8 @@ $this->htmlElement('body')->appendAttribute('class', 'login login-token');
 
 <?= $pageTitle($translate('Log in')) ?>
 
+<?php $this->trigger('view.login.before'); ?>
+
 <?= $this->messages() ?>
 
 <div class="login two-factor-auth-login">
