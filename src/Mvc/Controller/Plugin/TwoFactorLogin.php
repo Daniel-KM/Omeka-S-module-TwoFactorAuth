@@ -457,7 +457,7 @@ class TwoFactorLogin extends AbstractPlugin
         try {
             $this->mailer->send($message);
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->err(
                 "Error when sending email. Arguments:\n{json}", // @translate
                 ['json' => json_encode($params, 448)]
