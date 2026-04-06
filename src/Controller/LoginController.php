@@ -98,7 +98,7 @@ class LoginController extends OmekaLoginController
                                 'user' => $this->userAdapter->getRepresentation($this->identity()),
                             ])
                             : $this->jSend()->fail([
-                                'login' => $this->viewHelpers()->get('messages')->getTranslatedMessages('error')
+                                'login' => $this->flashedErrorMessage()
                                     ?: $this->translate('Email or password is invalid'), // @translate
                             ]);
                     }
@@ -246,7 +246,7 @@ class LoginController extends OmekaLoginController
             } else {
                 return $this->jSend()->fail([
                     'login' => null,
-                    'token_email' => $this->viewHelpers()->get('messages')->getTranslatedMessages('error')
+                    'token_email' => $this->flashedErrorMessage()
                         ?: $this->translate('Invalid code'), // @translate
                     // Don't resend dialog.
                 ]);
@@ -320,5 +320,12 @@ class LoginController extends OmekaLoginController
         ]);
         return $view
             ->setTemplate('omeka/login/login-token');
+    }
+
+    protected function flashedErrorMessage(): string
+    {
+        return $this->jSend()->flattenMessages(
+            $this->viewHelpers()->get('messages')->getTranslatedMessages('error')
+        );
     }
 }
