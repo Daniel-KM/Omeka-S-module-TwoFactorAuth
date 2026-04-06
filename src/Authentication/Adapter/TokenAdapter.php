@@ -171,10 +171,9 @@ class TokenAdapter extends AbstractAdapter
 
     public function createToken(User $user): Token
     {
-        // Don't use random integer directly to avoid repetitive digits.
-        // But allow two times the same digit, except 0.
-        $available = '0123456789123456789';
-        $code = (int) substr(str_shuffle($available), 0, 4);
+        // Use a cryptographically secure PRNG. Range 1000-9999 guarantees four
+        // digits when stored and displayed as int (no leading zero truncation).
+        $code = random_int(1000, 9999);
         $token = new Token();
         $token
             ->setUser($user)
