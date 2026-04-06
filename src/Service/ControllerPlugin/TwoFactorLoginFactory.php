@@ -2,8 +2,8 @@
 
 namespace TwoFactorAuth\Service\ControllerPlugin;
 
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 use TwoFactorAuth\Mvc\Controller\Plugin\TwoFactorLogin;
 
 class TwoFactorLoginFactory implements FactoryInterface

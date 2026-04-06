@@ -2,8 +2,8 @@
 
 namespace TwoFactorAuth\Service\Delegator;
 
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\DelegatorFactoryInterface;
+use Psr\Container\ContainerInterface;
 use TwoFactorAuth\Controller\LoginController;
 
 class LoginControllerDelegatorFactory implements DelegatorFactoryInterface

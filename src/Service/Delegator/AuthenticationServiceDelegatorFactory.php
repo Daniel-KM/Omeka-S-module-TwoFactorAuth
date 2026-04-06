@@ -2,10 +2,10 @@
 
 namespace TwoFactorAuth\Service\Delegator;
 
-use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\DelegatorFactoryInterface;
 use Omeka\Authentication\Adapter\KeyAdapter;
 use Omeka\Entity\User;
+use Psr\Container\ContainerInterface;
 use TwoFactorAuth\Authentication\Adapter\TokenAdapter;
 use TwoFactorAuth\Entity\Token;
 
