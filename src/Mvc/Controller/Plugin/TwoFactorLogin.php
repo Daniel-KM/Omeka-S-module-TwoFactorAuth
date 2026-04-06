@@ -365,6 +365,8 @@ class TwoFactorLogin extends AbstractPlugin
      *
      * @param array $params Params are already checked (from, to, subject, body).
      * @see \Omeka\Stdlib\Mailer
+     *
+     * @todo Use Common SendEmail.
      */
     public function sendEmail(array $params): bool
     {
