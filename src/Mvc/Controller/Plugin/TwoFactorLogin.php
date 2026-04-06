@@ -2,13 +2,13 @@
 
 namespace TwoFactorAuth\Mvc\Controller\Plugin;
 
+use Common\Mvc\Controller\Plugin\SendEmail;
 use Doctrine\ORM\EntityManager;
 use Laminas\Authentication\Adapter\AdapterInterface;
 use Laminas\Authentication\AuthenticationService;
 use Laminas\EventManager\EventManager;
 use Laminas\Http\Request;
 use Laminas\Log\Logger;
-use Laminas\Mail\Address;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Laminas\Mvc\Controller\Plugin\Url;
 use Laminas\Session\Container as SessionContainer;
@@ -18,7 +18,6 @@ use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Mvc\Controller\Plugin\Translate;
 use Omeka\Settings\Settings;
 use Omeka\Settings\UserSettings;
-use Omeka\Stdlib\Mailer;
 use TwoFactorAuth\Entity\Token;
 
 class TwoFactorLogin extends AbstractPlugin
@@ -44,11 +43,6 @@ class TwoFactorLogin extends AbstractPlugin
     protected $logger;
 
     /**
-     * @var Mailer
-     */
-    protected $mailer;
-
-    /**
      * @var Messenger
      */
     protected $messenger;
@@ -57,6 +51,11 @@ class TwoFactorLogin extends AbstractPlugin
      * @var Request
      */
     protected $request;
+
+    /**
+     * @var SendEmail
+     */
+    protected $sendEmail;
 
     /**
      * @var Settings
@@ -98,9 +97,9 @@ class TwoFactorLogin extends AbstractPlugin
         EntityManager $entityManager,
         EventManager $eventManager,
         Logger $logger,
-        Mailer $mailer,
         Messenger $messenger,
         Request $request,
+        SendEmail $sendEmail,
         Settings $settings,
         Translate $translate,
         Url $url,
@@ -113,9 +112,9 @@ class TwoFactorLogin extends AbstractPlugin
         $this->entityManager = $entityManager;
         $this->eventManager = $eventManager;
         $this->logger = $logger;
-        $this->mailer = $mailer;
         $this->messenger = $messenger;
         $this->request = $request;
+        $this->sendEmail = $sendEmail;
         $this->settings = $settings;
         $this->translate = $translate;
         $this->url = $url;
@@ -334,23 +333,45 @@ class TwoFactorLogin extends AbstractPlugin
     {
         $user = $token->getUser();
 
-        $emailParams = [
-            'subject' => $this->settings->get('twofactorauth_message_subject')
-                ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_subject']),
-            'body' => $this->settings->get('twofactorauth_message_body')
-                ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_body']),
-            'to' => [
-                $user->getEmail() => $user->getName(),
-            ],
-            'map' => [
-                'user_email' => $user->getEmail(),
-                'user_name' => $user->getName(),
-                'token' => $token->getCode(),
-                'code' => $token->getCode(),
-            ],
-        ];
+        $subject = $this->settings->get('twofactorauth_message_subject')
+            ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_subject']);
+        $body = $this->settings->get('twofactorauth_message_body')
+            ?: $this->translate->__invoke($this->configModule['config']['twofactorauth_message_body']);
 
-        return $this->sendEmail($emailParams);
+        $mainTitle = $this->settings->get('installation_title', 'Omeka S');
+        $mainUrl = $this->url->fromRoute('top', [], ['force_canonical' => true]);
+        $siteTitle = $this->site ? $this->site->title() : $mainTitle;
+        $siteUrl = $this->site ? $this->site->siteUrl(null, true) : $mainUrl;
+
+        $map = [
+            'main_title' => $mainTitle,
+            'main_url' => $mainUrl,
+            'site_title' => $siteTitle,
+            'site_url' => $siteUrl,
+            'email' => $user->getEmail(),
+            'name' => $user->getName(),
+            'user_email' => $user->getEmail(),
+            'user_name' => $user->getName(),
+            'token' => $token->getCode(),
+            'code' => $token->getCode(),
+        ];
+        $replace = [];
+        foreach ($map as $k => $v) {
+            $replace['{' . $k . '}'] = $v;
+        }
+        $subject = strtr($subject, $replace);
+        $body = strtr($body, $replace);
+
+        $to = [$user->getEmail() => $user->getName()];
+
+        $result = ($this->sendEmail)($body, $subject, $to);
+        if (!$result) {
+            $this->logger->err(
+                'Error when sending 2FA token email to {email}.', // @translate
+                ['email' => $user->getEmail()]
+            );
+        }
+        return $result;
     }
 
     public function resendToken(): bool
@@ -372,97 +393,4 @@ class TwoFactorLogin extends AbstractPlugin
         return $this->sendToken($token);
     }
 
-    /**
-     * Send an email.
-     *
-     * @param array $params Params are already checked (from, to, subject, body).
-     * @see \Omeka\Stdlib\Mailer
-     *
-     * @todo Use Common SendEmail.
-     */
-    public function sendEmail(array $params): bool
-    {
-        $defaultParams = [
-            'subject' => null,
-            'body' => null,
-            'from' => [],
-            'to' => [],
-            'cc' => [],
-            'bcc' => [],
-            'reply-to' => [],
-            'map' => [],
-        ];
-        $params += $defaultParams;
-
-        if (empty($params['to']) || empty($params['subject']) || empty($params['body'])) {
-            $this->logger->err(
-                'The message has no subject, content or recipient.' // @translate
-            );
-            return false;
-        }
-
-        $mainTitle = $this->settings->get('installation_title', 'Omeka S');
-        $mainUrl = $this->url->fromRoute('top', [], ['force_canonical' => true]);
-        $siteTitle = $this->site ? $this->site->title() : $mainTitle;
-        $siteUrl = $this->site ? $this->site->siteUrl(null, true) : $mainUrl;
-
-        $userEmail = !empty($params['user_email'])
-            ? $params['user_email']
-            : (!empty($params['email'])
-                ? $params['email']
-                : (!empty($params['user']) ? $params['user']->getEmail() : ''));
-        $userName = !empty($params['user_name'])
-            ? $params['user_name']
-            : (!empty($params['name'])
-                ? $params['name']
-                : (!empty($params['user']) ? $params['user']->getName() : ''));
-
-        $map = $params['map'] + [
-            'main_title' => $mainTitle,
-            'main_url' => $mainUrl,
-            'site_title' => $siteTitle,
-            'site_url' => $siteUrl,
-            'user_email' => $userEmail,
-            'user_name' => $userName,
-        ];
-        $subject = str_replace(array_map(fn ($v) => '{' . $v . '}', array_keys($map)), array_values($map), $params['subject']);
-        $body = str_replace(array_map(fn ($v) => '{' . $v . '}', array_keys($map)), array_values($map), $params['body']);
-
-        $getAddress = fn ($email, $name) => new Address(is_string($email) && strpos($email, '@') ? $email : $name, $name);
-
-        $message = $this->mailer->createMessage();
-        $message
-            ->setSubject($subject)
-            ->setBody($body);
-        if (!empty($params['from'])) {
-            $from = is_array($params['from']) ? $params['from'] : [$params['from']];
-            $message->setFrom($getAddress(key($from), reset($from)));
-        }
-        $to = is_array($params['to']) ? $params['to'] : [$params['to']];
-        foreach ($to as $email => $name) {
-            $message->addTo($getAddress($email, $name));
-        }
-        $cc = is_array($params['cc']) ? $params['cc'] : [$params['cc']];
-        foreach ($cc as $email => $name) {
-            $message->addCc($getAddress($email, $name));
-        }
-        $bcc = is_array($params['bcc']) ? $params['bcc'] : [$params['bcc']];
-        foreach ($bcc as $email => $name) {
-            $message->addBcc($getAddress($email, $name));
-        }
-        $replyTo = is_array($params['reply-to']) ? $params['reply-to'] : [$params['reply-to']];
-        foreach ($replyTo as $email => $name) {
-            $message->addReplyTo($getAddress($email, $name));
-        }
-        try {
-            $this->mailer->send($message);
-            return true;
-        } catch (\Throwable $e) {
-            $this->logger->err(
-                "Error when sending email. Arguments:\n{json}", // @translate
-                ['json' => json_encode($params, 448)]
-            );
-            return false;
-        }
-    }
 }
