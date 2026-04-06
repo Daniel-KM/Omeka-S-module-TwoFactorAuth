@@ -108,18 +108,22 @@
                         window.location.reload();
                         return;
                     }
-                    // Success for first step, but require a second step.
-                    // Use the existing dialog if any, else use the one sent.
+                    // Success for first step, but require a second step. Always
+                    // replace any existing dialog: the server-sent markup
+                    // carries a fresh CSRF token and form state.
                     let dialog = document.querySelector('dialog.dialog-2fa-token');
-                    if (!dialog) {
-                        dialog = data && data.data ? data.data.dialog : '';
-                        $('body').append(dialog);
-                        dialog = document.querySelector('dialog.dialog-2fa-token');
-                        if (!dialog) {
-                            let msg = jSendMessage(data);
-                            dialogMessage(msg ? msg : 'Check input', true);
-                            return;
+                    const newDialog = data && data.data ? data.data.dialog : '';
+                    if (newDialog) {
+                        if (dialog) {
+                            dialog.remove();
                         }
+                        $('body').append(newDialog);
+                        dialog = document.querySelector('dialog.dialog-2fa-token');
+                    }
+                    if (!dialog) {
+                        let msg = jSendMessage(data);
+                        dialogMessage(msg ? msg : 'Check input', true);
+                        return;
                     }
                     dialog.showModal();
                     $(dialog).trigger('o:dialog-opened');
