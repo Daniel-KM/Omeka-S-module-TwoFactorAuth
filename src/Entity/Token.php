@@ -7,12 +7,18 @@ use Omeka\Entity\AbstractEntity;
 use Omeka\Entity\User;
 
 /**
- * This entity is not available via omeka api.
- * The token is removed once validated.
+ * This entity is not available via omeka api. The token is removed once
+ * validated.
  *
  * @Entity
  * @Table(
- *     name="tfa_token"
+ *     name="tfa_token",
+ *     indexes={
+ *         @Index(
+ *             name="idx_user_code",
+ *             columns={"user_id", "code"}
+ *         )
+ *     }
  * )
  */
 class Token extends AbstractEntity

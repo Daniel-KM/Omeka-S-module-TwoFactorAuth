@@ -4,6 +4,7 @@ CREATE TABLE `tfa_token` (
     `code` INT NOT NULL,
     `created` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     INDEX IDX_14CE841EA76ED395 (`user_id`),
+    INDEX idx_user_code (`user_id`, `code`),
     PRIMARY KEY(`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB;
 
