@@ -54,7 +54,11 @@ class Token extends AbstractEntity
      * @var int
      *
      * @Column(
-     *     type="integer"
+     *     type="integer",
+     *     nullable=false,
+     *     options={
+     *         "unsigned": true
+     *     }
      * )
      */
     protected $code;

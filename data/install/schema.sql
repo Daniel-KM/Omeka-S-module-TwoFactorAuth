@@ -1,7 +1,7 @@
 CREATE TABLE `tfa_token` (
     `id` INT AUTO_INCREMENT NOT NULL,
     `user_id` INT NOT NULL,
-    `code` INT NOT NULL,
+    `code` INT UNSIGNED NOT NULL,
     `created` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     INDEX IDX_14CE841EA76ED395 (`user_id`),
     INDEX idx_user_code (`user_id`, `code`),
