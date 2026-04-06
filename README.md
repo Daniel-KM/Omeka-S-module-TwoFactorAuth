@@ -35,6 +35,19 @@ the module to `TwoFactorAuth`.
 
 Then install it like any other Omeka module and follow the config instructions.
 
+* For test
+
+The module includes a comprehensive test suite with unit and functional tests.
+Run them from the root of Omeka:
+
+```sh
+# Unit tests (no database).
+vendor/bin/phpunit -c modules/TwoFactorAuth/tests/phpunit-unit.xml --testdox
+
+# Full tests (requires test database).
+vendor/bin/phpunit -c modules/TwoFactorAuth/phpunit.xml --testdox
+```
+
 
 Quick start
 -----------
@@ -44,6 +57,19 @@ authentication.
 
 When enabled, a mail is sent to the user with a four digits check code, that
 must be pasted in the form to log in.
+
+The subject and body of the mail can be customized in the module settings. The
+following placeholders are replaced:
+
+- `{main_title}`, `{main_url}`: main installation
+- `{site_title}`, `{site_url}`: current site (or main when not in a site)
+- `{email}`, `{user_email}`: user email
+- `{name}`, `{user_name}`: user name
+- `{token}`, `{code}`: generated token
+
+The mail is sent as UTF-8 with quoted-printable encoding, so accented characters
+are decoded properly by mail clients. Plain text and basic HTML bodies are
+supported: when the body starts with `<`, it is sent as HTML.
 
 
 TODO
