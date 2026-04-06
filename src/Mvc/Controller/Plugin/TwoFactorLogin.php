@@ -23,6 +23,17 @@ use TwoFactorAuth\Entity\Token;
 class TwoFactorLogin extends AbstractPlugin
 {
     /**
+     * Maximum number of invalid PIN attempts before the 2FA session is
+     * invalidated and the user must restart the login flow.
+     */
+    const MAX_ATTEMPTS = 5;
+
+    /**
+     * Minimum delay in seconds between two "resend code" requests.
+     */
+    const RESEND_MIN_INTERVAL = 30;
+
+    /**
      * @var AuthenticationService
      */
     protected $authenticationService;
@@ -207,6 +218,10 @@ class TwoFactorLogin extends AbstractPlugin
         $user = $this->userFromEmail($email);
         if (!$user) {
             sleep(3);
+            $this->logger->warn(
+                '[TwoFactorAuth] Login attempt on unknown identity: {email}.', // @translate
+                ['email' => $email]
+            );
             return false;
         }
 
@@ -257,6 +272,10 @@ class TwoFactorLogin extends AbstractPlugin
 
         $session = $sessionManager->getStorage();
         $session->offsetSet('tfa_user_email', $user->getEmail());
+        // Reset rate-limit counters: a fresh 2FA session starts with a full set
+        // of attempts and the resend throttle window restarts.
+        $session->offsetUnset('tfa_attempts');
+        $session->offsetUnset('tfa_last_sent');
         $this->request->setMetadata('first', true);
         $this->messenger->addSuccess(
             'Fill the second form with the code received by email to log in' // @translate
@@ -296,6 +315,30 @@ class TwoFactorLogin extends AbstractPlugin
             return null;
         }
 
+        // Block brute force: cap failed attempts per 2FA session. When the cap
+        // is reached, drop the 2FA session so the user must re-authenticate
+        // from step 1 (new token required).
+        $attempts = (int) $session->offsetGet('tfa_attempts');
+        if ($attempts >= self::MAX_ATTEMPTS) {
+            $session->offsetUnset('tfa_user_email');
+            $session->offsetUnset('tfa_attempts');
+            $session->offsetUnset('tfa_last_sent');
+            $user = $this->userFromEmail($userEmail);
+            if ($user) {
+                /** @var \TwoFactorAuth\Authentication\Adapter\TokenAdapter $adapter */
+                $adapter = $this->authenticationService->getAdapter();
+                $adapter->cleanTokens($user);
+            }
+            $this->logger->warn(
+                '[TwoFactorAuth] Too many invalid codes for {email}. 2FA session invalidated.', // @translate
+                ['email' => $userEmail]
+            );
+            $this->messenger->addError(
+                'Too many invalid codes. Retry to log in.' // @translate
+            );
+            return null;
+        }
+
         /** @var \TwoFactorAuth\Authentication\Adapter\TokenAdapter $adapter */
         $adapter = $this->authenticationService->getAdapter();
         $adapter
@@ -306,15 +349,17 @@ class TwoFactorLogin extends AbstractPlugin
         // Here, use the authentication service.
         $result = $this->authenticationService->authenticate();
         if ($result->isValid()) {
+            $session->offsetUnset('tfa_attempts');
+            $session->offsetUnset('tfa_last_sent');
             $this->messenger->clear();
             $this->messenger->addSuccess('Successfully logged in'); // @translate
             $this->eventManager->trigger('user.login', $this->authenticationService->getIdentity());
             return true;
         }
 
-        // TODO Add a counter to avoid brute-force attack. For now, a sleep is enough.
-        // Slow down the process to avoid brute force.
+        // Slow down the process to mitigate online brute force attempts.
         sleep(3);
+        $session->offsetSet('tfa_attempts', $attempts + 1);
         $this->messenger->addError('Invalid code'); // @translate
         return false;
     }
@@ -383,6 +428,14 @@ class TwoFactorLogin extends AbstractPlugin
             return false;
         }
 
+        // Throttle resend requests to mitigate email spam and token enumeration
+        // by repeated regeneration.
+        $now = time();
+        $lastSent = (int) $session->offsetGet('tfa_last_sent');
+        if ($lastSent && ($now - $lastSent) < self::RESEND_MIN_INTERVAL) {
+            return false;
+        }
+
         $user = $this->userFromEmail($userEmail);
         if (!$user) {
             return false;
@@ -390,7 +443,11 @@ class TwoFactorLogin extends AbstractPlugin
 
         // Don't log again: the possible issue with email is already logged.
         $token = $this->prepareToken($user);
-        return $this->sendToken($token);
+        $result = $this->sendToken($token);
+        if ($result) {
+            $session->offsetSet('tfa_last_sent', $now);
+        }
+        return $result;
     }
 
 }
