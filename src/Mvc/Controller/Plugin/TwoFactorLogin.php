@@ -184,8 +184,12 @@ class TwoFactorLogin extends AbstractPlugin
 
     public function processLogin(string $email, string $password): bool
     {
+        // Create a new session, avoiding the warning in case of error.
+        // Avoid warning: session_regenerate_id(): Session object destruction
+        // failed when session save handler has issues.
+        // See /vendor/laminas/laminas-session/src/SessionManager.php on line 337.
         $sessionManager = SessionContainer::getDefaultManager();
-        $sessionManager->regenerateId();
+        @$sessionManager->regenerateId();
         $adapter = $this->authenticationService->getAdapter();
         $adapter->setIdentity($email);
         $adapter->setCredential($password);
@@ -245,8 +249,12 @@ class TwoFactorLogin extends AbstractPlugin
         }
 
         // Prepare the second step.
+        // Create a new session, avoiding the warning in case of error.
+        // Avoid warning: session_regenerate_id(): Session object destruction
+        // failed when session save handler has issues.
+        // See /vendor/laminas/laminas-session/src/SessionManager.php on line 337.
         $sessionManager = SessionContainer::getDefaultManager();
-        $sessionManager->regenerateId();
+        @$sessionManager->regenerateId();
 
         $session = $sessionManager->getStorage();
         $session->offsetSet('tfa_user_email', $user->getEmail());
@@ -274,8 +282,12 @@ class TwoFactorLogin extends AbstractPlugin
             return false;
         }
 
+        // Create a new session, avoiding the warning in case of error.
+        // Avoid warning: session_regenerate_id(): Session object destruction
+        // failed when session save handler has issues.
+        // See /vendor/laminas/laminas-session/src/SessionManager.php on line 337.
         $sessionManager = SessionContainer::getDefaultManager();
-        $sessionManager->regenerateId();
+        @$sessionManager->regenerateId();
         $session = $sessionManager->getStorage();
         $userEmail = $session->offsetGet('tfa_user_email');
         if (!$userEmail) {
