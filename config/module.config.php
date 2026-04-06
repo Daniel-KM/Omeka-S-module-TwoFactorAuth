@@ -40,7 +40,7 @@ return [
     'translator' => [
         'translation_file_patterns' => [
             [
-                'type' => 'gettext',
+                'type' => \Laminas\I18n\Translator\Loader\Gettext::class,
                 'base_dir' => dirname(__DIR__) . '/language',
                 'pattern' => '%s.mo',
                 'text_domain' => null,
@@ -53,7 +53,7 @@ return [
             'twofactorauth_expiration_duration' => 1200,
             'twofactorauth_message_subject' => '[{site_title}] {token} is your code to log in', // @translate
             'twofactorauth_message_body' => <<<'TXT'
-                Hi {user_name},
+                Hi {name},
                 The token to copy-paste to log in on {site_title} is:
                 {token}
                 Good browsing!

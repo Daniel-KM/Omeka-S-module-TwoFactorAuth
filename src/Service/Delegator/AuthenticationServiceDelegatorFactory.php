@@ -38,7 +38,7 @@ class AuthenticationServiceDelegatorFactory implements DelegatorFactoryInterface
         $tokenAdapter = new TokenAdapter(
             $adapter,
             $services->get('Omeka\Connection'),
-            $services->get('Omeka\EntityManager'),
+            $entityManager,
             $entityManager->getRepository(Token::class),
             $entityManager->getRepository(User::class),
             $services->get('Omeka\Settings\User'),

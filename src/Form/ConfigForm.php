@@ -57,7 +57,7 @@ class ConfigForm extends Form
                 'attributes' => [
                     'id' => 'twofactorauth_message_body',
                     'placeholder' => <<<'TXT'
-                        Hi {user_name},
+                        Hi {name},
                         The token to copy-paste to log in on {site_title} is:
                         {token}
                         Good browsing!

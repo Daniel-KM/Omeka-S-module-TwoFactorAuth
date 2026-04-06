@@ -127,7 +127,7 @@ class LoginController extends OmekaLoginController
                         if ($isAjax) {
                             return $this->jSend()->error();
                         }
-                        return class_exists('Guest\Module')
+                        return class_exists('Guest\Module', false)
                             ? $this->redirect()->toRoute('site/guest/anonymous', ['action' => 'login'], true)
                             : $this->redirect()->toRoute('login');
                     }
@@ -208,7 +208,7 @@ class LoginController extends OmekaLoginController
                     if ($isAjax) {
                         return $this->jSend()->error();
                     }
-                    return class_exists('Guest\Module')
+                    return class_exists('Guest\Module', false)
                         ? $this->redirect()->toRoute('site/guest/anonymous', ['action' => 'login'], true)
                         : $this->redirect()->toRoute('login');
                 } elseif ($result) {
