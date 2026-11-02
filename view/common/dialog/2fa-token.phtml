@@ -9,7 +9,7 @@ $url = $plugins->get('url');
 $translate = $plugins->get('translate');
 ?>
 
-<dialog id="2fa-token" class="popup popup-dialog dialog-2fa-token" aria-label="<?= $this->escapeHtmlAttr($translate('Two-factor authentication')) ?>">
+<dialog id="2fa-token" class="popup popup-dialog dialog-2fa-token" aria-labelledby="dialog-2fa-token-heading">
     <div class="dialog-background">
         <div class="dialog-panel">
             <div class="dialog-header">
@@ -21,6 +21,7 @@ $translate = $plugins->get('translate');
                 </div>
             </div>
             <div class="dialog-contents">
+                <h2 id="dialog-2fa-token-heading" class="dialog-heading"><?= $translate('Two-factor authentication') ?></h2>
                 <?= $this->form($form) ?>
             </div>
             <div class="dialog-footer">

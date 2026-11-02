@@ -30,16 +30,22 @@
          */
         const beforeSpin = function (element) {
             spinnerOf(element).addClass('fa-spin');
-            $(element)
-                .prop('disabled', true)
+            const button = $(element);
+            button.is('button, input')
+                ? button.prop('disabled', true)
+                : button.attr('aria-disabled', 'true');
+            button
                 .attr('aria-busy', 'true')
                 .addClass('is-busy');
         };
 
         const afterSpin = function (element) {
             spinnerOf(element).removeClass('fa-spin');
-            $(element)
-                .prop('disabled', false)
+            const button = $(element);
+            button.is('button, input')
+                ? button.prop('disabled', false)
+                : button.removeAttr('aria-disabled');
+            button
                 .removeAttr('aria-busy')
                 .removeClass('is-busy');
         };
