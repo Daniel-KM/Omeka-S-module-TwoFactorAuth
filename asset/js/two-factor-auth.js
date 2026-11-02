@@ -52,7 +52,7 @@
          * Get the main message of jSend output, in particular for status fail.
          */
         const jSendMessage = function(data) {
-            if (typeof data !== 'object') {
+            if (!data || typeof data !== 'object') {
                 return null;
             }
             if (data.message) {
@@ -67,6 +67,13 @@
                 }
             }
             return null;
+        }
+
+        /**
+         * Check if the response is a jSend output, not a html page.
+         */
+        const isJSend = function(data) {
+            return data !== null && typeof data === 'object' && typeof data.status === 'string';
         }
 
         const dialogMessage = function (message, nl2br = false) {
@@ -129,6 +136,12 @@
                     beforeSend: beforeSpin(submitButton),
                 })
                 .done(function(data) {
+                    // The action is not an api endpoint, so submit it normally:
+                    // a new login has no side effect.
+                    if (!isJSend(data)) {
+                        HTMLFormElement.prototype.submit.call(form[0]);
+                        return;
+                    }
                     // Success may be a single step login or a second step login.
                     if (data && data.data && data.data.login === true) {
                         redirectAfterLogin(data);
