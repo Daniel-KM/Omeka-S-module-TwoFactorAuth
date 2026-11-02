@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-06 00:00+0000\n"
+"POT-Creation-Date: 2026-11-02 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,36 +17,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:30 Module.php:41
+#: data/scripts/upgrade.php:31 Module.php:53
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: data/scripts/upgrade.php:34
+#: data/scripts/upgrade.php:35
 msgid "Missing requirement. Unable to upgrade."
 msgstr ""
 
-#: src/Controller/LoginController.php:156
+#: src/Controller/LoginController.php:163
 msgid "Ajax login form is not implemented here. Use Guest page instead."
 msgstr ""
 
-#: src/Controller/LoginController.php:250
+#: src/Controller/LoginController.php:253
 msgid "Invalid code"
 msgstr ""
 
-#: src/Controller/LoginController.php:308
+#: src/Controller/LoginController.php:342
 msgid "A new code was resent."
 msgstr ""
 
-#: src/Controller/LoginController.php:310
+#: src/Controller/LoginController.php:344
 msgid "Unable to send email."
 msgstr ""
 
-#: view/common/dialog/2fa-token.phtml:12
+#: view/common/dialog/2fa-token.phtml:24
 msgid "Two-factor authentication"
 msgstr ""
 
-#: view/common/dialog/2fa-token.phtml:27 view/omeka/login/login-token.phtml:25
+#: view/common/dialog/2fa-token.phtml:29 view/omeka/login/login-token.phtml:25
 msgid "Resend a code"
 msgstr ""
 
@@ -87,7 +87,7 @@ msgstr ""
 msgid "Too many invalid codes. Retry to log in."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:415
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:425
 msgid "Error when sending 2FA token email to {email}."
 msgstr ""
 
@@ -117,7 +117,7 @@ msgid ""
 "{email}, {name}, {token}, {code}."
 msgstr ""
 
-#: src/Form/ConfigForm.php:47 config/module.config.php:54
+#: src/Form/ConfigForm.php:47 config/module.config.php:58
 msgid "[{site_title}] {token} is your code to log in"
 msgstr ""
 
@@ -125,7 +125,7 @@ msgstr ""
 msgid "Text of the email"
 msgstr ""
 
-#: src/Form/ConfigForm.php:59 config/module.config.php:55
+#: src/Form/ConfigForm.php:59 config/module.config.php:59
 msgid ""
 "Hi {name},\n"
 "The token to copy-paste to log in on {site_title} is:\n"
@@ -140,4 +140,12 @@ msgstr ""
 
 #: src/Form/UserSettingsFieldset.php:18
 msgid "Enable two-factor authentication with a code sent by email"
+msgstr ""
+
+#: config/module.config.php:51
+msgid "Check input"
+msgstr ""
+
+#: config/module.config.php:52
+msgid "An error occurred."
 msgstr ""
