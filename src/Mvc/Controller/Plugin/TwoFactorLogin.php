@@ -400,12 +400,15 @@ class TwoFactorLogin extends AbstractPlugin
             'token' => $token->getCode(),
             'code' => $token->getCode(),
         ];
+        // The subject is text and the body is html.
         $replace = [];
+        $replaceHtml = [];
         foreach ($map as $k => $v) {
-            $replace['{' . $k . '}'] = $v;
+            $replace['{' . $k . '}'] = (string) $v;
+            $replaceHtml['{' . $k . '}'] = htmlspecialchars((string) $v, ENT_QUOTES | ENT_HTML5);
         }
         $subject = strtr($subject, $replace);
-        $body = strtr($body, $replace);
+        $body = strtr($body, $replaceHtml);
 
         $to = [$user->getEmail() => $user->getName()];
 
