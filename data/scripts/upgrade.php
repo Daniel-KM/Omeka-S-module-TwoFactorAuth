@@ -16,7 +16,8 @@ namespace TwoFactorAuth;
  * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
 $plugins = $services->get('ControllerPluginManager');
-$url = $services->get('ViewHelperManager')->get('url');
+$helpers = $services->get('ViewHelperManager');
+$url = $helpers->get('url');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
 $translate = $plugins->get('translate');
@@ -35,21 +36,14 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
 }
 
 if (version_compare($oldVersion, '3.4.4', '<')) {
-    $sql = <<<'SQL'
-        CREATE INDEX idx_user_code ON tfa_token (user_id, code);
-        SQL;
-    try {
-        $connection->executeStatement($sql);
-    } catch (\Exception $e) {
-        // Index may already exist on reinstalls.
+    // The index may already exist on reinstalls.
+    $hasIndex = (bool) $connection->executeQuery(
+        "SHOW INDEX FROM `tfa_token` WHERE `Key_name` = 'idx_user_code'"
+    )->fetchOne();
+    if (!$hasIndex) {
+        $connection->executeStatement('CREATE INDEX idx_user_code ON tfa_token (user_id, code)');
     }
 
-    $sql = <<<'SQL'
-        ALTER TABLE tfa_token MODIFY code INT UNSIGNED NOT NULL;
-        SQL;
-    try {
-        $connection->executeStatement($sql);
-    } catch (\Exception $e) {
-        // Column may already be unsigned on reinstalls.
-    }
+    // Idempotent.
+    $connection->executeStatement('ALTER TABLE tfa_token MODIFY code INT UNSIGNED NOT NULL');
 }
