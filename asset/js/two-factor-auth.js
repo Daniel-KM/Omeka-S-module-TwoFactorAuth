@@ -7,32 +7,46 @@
          * @see ContactUs, Guest, SearchHistory, Selection, TwoFactorAuth.
          */
 
-        const beforeSpin = function (element) {
-            var span = $(element).find('span');
-            if (!span.length) {
-                span = $(element).next('span.appended');
-                if (!span.length) {
-                    $('<span class="appended"></span>').insertAfter($(element));
-                    span = $(element).next('span');
-                }
+        /**
+         * Get or create the spinner of a button, hidden by default.
+         *
+         * The spinner is prepended inside a button or a link, and inserted
+         * before an input, that cannot contain an element. It is created on
+         * load, so it takes its place and the button is not resized when busy.
+         */
+        const spinnerOf = function (element) {
+            const button = $(element);
+            const isInput = button.is('input');
+            let spinner = isInput ? button.prev('span.spinner') : button.children('span.spinner');
+            if (!spinner.length) {
+                spinner = $('<span class="spinner fas fa-sync" aria-hidden="true"></span>');
+                isInput ? spinner.insertBefore(button) : spinner.prependTo(button);
             }
-            // TODO Disable the button instead of hide and resize it to let place to spinner?
-            element.hide();
-            span.addClass('fas fa-sync fa-spin');
+            return spinner;
+        };
+
+        /**
+         * Disable the button and display the spinner at the left of its label.
+         */
+        const beforeSpin = function (element) {
+            spinnerOf(element).addClass('fa-spin');
+            $(element)
+                .prop('disabled', true)
+                .attr('aria-busy', 'true')
+                .addClass('is-busy');
         };
 
         const afterSpin = function (element) {
-            var span = $(element).find('span');
-            if (!span.length) {
-                span = $(element).next('span.appended');
-                if (span.length) {
-                    span.remove();
-                }
-            } else {
-                span.removeClass('fas fa-sync fa-spin');
-            }
-            element.show();
+            spinnerOf(element).removeClass('fa-spin');
+            $(element)
+                .prop('disabled', false)
+                .removeAttr('aria-busy')
+                .removeClass('is-busy');
         };
+
+        $('#loginform [type=submit], #login-token-form [type=submit], .resend-code').each(function () {
+            spinnerOf(this);
+        });
 
         /**
          * Get the main message of jSend output, in particular for status fail.

@@ -26,12 +26,15 @@ class TokenForm extends Form
                     'step' => 1,
                 ],
             ])
-            // TODO Button for spin wait.
             ->add([
                 'name' => 'submit_token',
-                'type' => Element\Submit::class,
+                'type' => Element\Button::class,
+                'options' => [
+                    'label' => 'Submit', // @translate
+                ],
                 'attributes' => [
-                    'value' => 'Submit', // @translate
+                    'type' => 'submit',
+                    'value' => 'Submit',
                 ],
             ])
         ;

@@ -26,6 +26,22 @@
         box-shadow: none;
     }
 
+    /* Busy button: disabled, with a spinner at the left of the label. The
+    spinner is always present, but invisible, so the button is never resized. */
+    .is-busy {
+        pointer-events: none;
+    }
+    .spinner:not(.fa-spin) {
+        visibility: hidden;
+    }
+    button .spinner,
+    a .spinner {
+        margin-right: 0.5em;
+    }
+    span.spinner + input {
+        margin-left: 0.5em;
+    }
+
     .login-token-form .field {
         min-width: 400px;
     }
