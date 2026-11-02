@@ -167,7 +167,7 @@
                     }
                     if (!dialog) {
                         let msg = jSendMessage(data);
-                        dialogMessage(msg ? msg : 'Check input', true);
+                        dialogMessage(msg ? msg : Omeka.jsTranslate('Check input'), true);
                         return;
                     }
                     dialog.showModal();
@@ -178,11 +178,11 @@
                     if (data && data.status === 'fail') {
                         // Fail is always an email/password error here.
                         let msg = jSendMessage(data);
-                        dialogMessage(msg ? msg : 'Check input', true);
+                        dialogMessage(msg ? msg : Omeka.jsTranslate('Check input'), true);
                         form[0].reset();
                     } else {
                         // Error is a server error (in particular cannot send mail).
-                        let msg = data && data.status === 'error' && data.message && data.message.length ? data.message : 'An error occurred.';
+                        let msg = data && data.status === 'error' && data.message && data.message.length ? data.message : Omeka.jsTranslate('An error occurred.');
                         dialogMessage(msg, true);
                     }
                 })
@@ -216,11 +216,11 @@
                     if (data && data.status === 'fail') {
                         // Fail is always an email/password or token error here.
                         let msg = jSendMessage(data);
-                        dialogMessage(msg ? msg : 'Check input', true);
+                        dialogMessage(msg ? msg : Omeka.jsTranslate('Check input'), true);
                         form[0].reset();
                     } else {
                         // Error is a server error.
-                        let msg = data && data.status === 'error' && data.message && data.message.length ? data.message : 'An error occurred.';
+                        let msg = data && data.status === 'error' && data.message && data.message.length ? data.message : Omeka.jsTranslate('An error occurred.');
                         dialogMessage(msg, true);
                     }
                 })

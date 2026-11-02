@@ -47,6 +47,10 @@ return [
             ],
         ],
     ],
+    'js_translate_strings' => [
+        'Check input', // @translate
+        'An error occurred.', // @translate
+    ],
     'twofactorauth' => [
         'config' => [
             'twofactorauth_force_2fa' => false,
