@@ -410,6 +410,13 @@ class TwoFactorLogin extends AbstractPlugin
         $subject = strtr($subject, $replace);
         $body = strtr($body, $replaceHtml);
 
+        // The body is html (ckeditor), but it may start with a text or be the
+        // default one, so wrap it in a tag to send it as html in all cases.
+        if (!preg_match('~<[a-z][^>]*>~i', $body)) {
+            $body = nl2br($body);
+        }
+        $body = '<div>' . $body . '</div>';
+
         $to = [$user->getEmail() => $user->getName()];
 
         $result = ($this->sendEmail)($body, $subject, $to);
