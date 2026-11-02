@@ -230,14 +230,11 @@
         });
 
         $(document).on('click', '.resend-code', function(e) {
-            // The button may be a button or a link.
-            // The button is the ajax way; the link reloads the page.
+            // The button may be a button or a link: the link has the query in
+            // the href, so skip the default navigation and always use ajax.
+            e.preventDefault();
             const button = $(this);
             const urlButton = button.attr('data-url') ? button.attr('data-url') : button.attr('href');
-            if (button.element === 'A') {
-                window.location.href = urlButton + '?resend_token=1';
-                return;
-            }
             $
                 .ajax({
                     type: 'GET',
