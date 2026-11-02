@@ -50,10 +50,12 @@ class LoginController extends OmekaLoginController
     public function loginAction()
     {
         if ($this->auth->hasIdentity()) {
-            return $this->userIsAllowed('Omeka\Controller\Admin\Index', 'browse')
-                ? $this->redirect()->toRoute('admin')
-                : $this->redirect()->toRoute('top');
+            return $this->redirect()->toUrl($this->redirectUrlAfterLogin());
         }
+
+        // The session may be regenerated during login, so keep the url where
+        // to go after login, for example set by another module.
+        $redirectUrl = $this->sessionRedirectUrl();
 
         /**
          * @var \Laminas\Http\PhpEnvironment\Request $request
@@ -96,6 +98,7 @@ class LoginController extends OmekaLoginController
                             ? $this->jSend()->success([
                                 'login' => true,
                                 'user' => $this->userAdapter->getRepresentation($this->identity()),
+                                'redirect_url' => $this->redirectUrlAfterLogin($redirectUrl),
                             ])
                             : $this->jSend()->fail([
                                 'login' => $this->flashedErrorMessage()
@@ -116,13 +119,17 @@ class LoginController extends OmekaLoginController
                     $prop->setAccessible(true);
                     $prop->setValue($this->realLoginController, $this->getRequest());
                     $prop->setAccessible(false);
-                    return $this->realLoginController->loginAction();
+                    $response = $this->realLoginController->loginAction();
+                    return $redirectUrl && $this->auth->hasIdentity()
+                        ? $this->redirect()->toUrl($redirectUrl)
+                        : $response;
                 }
 
                 $result = $twoFactorLogin->validateLoginStep1($email, $password);
                 if ($result) {
                     $user = $twoFactorLogin->userFromEmail($email);
                     $result = $twoFactorLogin->prepareLoginStep2($user);
+                    $this->keepSessionRedirectUrl($redirectUrl);
                     if (!$result) {
                         if ($isAjax) {
                             return $this->jSend()->error();
@@ -177,10 +184,12 @@ class LoginController extends OmekaLoginController
     public function loginTokenAction()
     {
         if ($this->auth->hasIdentity()) {
-            return $this->userIsAllowed('Omeka\Controller\Admin\Index', 'browse')
-                ? $this->redirect()->toRoute('admin')
-                : $this->redirect()->toRoute('top');
+            return $this->redirect()->toUrl($this->redirectUrlAfterLogin());
         }
+
+        // The session may be regenerated during login, so keep the url where
+        // to go after login, for example set by another module.
+        $redirectUrl = $this->sessionRedirectUrl();
 
         /**
          * @var \Laminas\Http\PhpEnvironment\Request $request
@@ -217,16 +226,10 @@ class LoginController extends OmekaLoginController
                         return $this->jSend()->success([
                             'login' => true,
                             'user' => $this->userAdapter->getRepresentation($user),
+                            'redirect_url' => $this->redirectUrlAfterLogin($redirectUrl),
                         ]);
                     }
-                    $sessionManager = SessionContainer::getDefaultManager();
-                    $session = $sessionManager->getStorage();
-                    if ($redirectUrl = $session->offsetGet('redirect_url')) {
-                        return $this->redirect()->toUrl($redirectUrl);
-                    }
-                    return $this->userIsAllowed('Omeka\Controller\Admin\Index', 'browse')
-                        ? $this->redirect()->toRoute('admin')
-                        : $this->redirect()->toRoute('top');
+                    return $this->redirect()->toUrl($this->redirectUrlAfterLogin($redirectUrl));
                 }
             } else {
                 $this->messenger()->addFormErrors($form);
@@ -258,6 +261,37 @@ class LoginController extends OmekaLoginController
         ]);
         return $view
             ->setTemplate('omeka/login/login-token');
+    }
+
+    /**
+     * Get the url where to go after login, stored in session by Omeka or a
+     * module.
+     */
+    protected function sessionRedirectUrl(): ?string
+    {
+        $redirectUrl = SessionContainer::getDefaultManager()->getStorage()->offsetGet('redirect_url');
+        return $redirectUrl ? (string) $redirectUrl : null;
+    }
+
+    /**
+     * Restore the url where to go after login when the session was renewed.
+     */
+    protected function keepSessionRedirectUrl(?string $redirectUrl): void
+    {
+        if ($redirectUrl) {
+            SessionContainer::getDefaultManager()->getStorage()->offsetSet('redirect_url', $redirectUrl);
+        }
+    }
+
+    protected function redirectUrlAfterLogin(?string $redirectUrl = null): string
+    {
+        $redirectUrl ??= $this->sessionRedirectUrl();
+        if ($redirectUrl) {
+            return $redirectUrl;
+        }
+        return $this->userIsAllowed('Omeka\Controller\Admin\Index', 'browse')
+            ? $this->url()->fromRoute('admin')
+            : $this->url()->fromRoute('top');
     }
 
     /**

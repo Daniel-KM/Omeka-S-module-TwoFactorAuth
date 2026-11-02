@@ -87,6 +87,17 @@
         };
 
         /**
+         * Go to the url set by the server after login, else reload the page.
+         */
+        const redirectAfterLogin = function(data) {
+            if (data && data.data && data.data.redirect_url) {
+                window.location.href = data.data.redirect_url;
+            } else {
+                window.location.reload();
+            }
+        };
+
+        /**
          * Override submit of login form to manage optional login-token form.
          * @see Guest to manage the same login form in sites.
          */
@@ -106,7 +117,7 @@
                 .done(function(data) {
                     // Success may be a single step login or a second step login.
                     if (data && data.data && data.data.login === true) {
-                        window.location.reload();
+                        redirectAfterLogin(data);
                         return;
                     }
                     // Success for first step, but require a second step. Always
@@ -165,8 +176,7 @@
                 })
                 .done(function(data) {
                     // Success may be a single step login or a second step login.
-                    // Anyway, just reload the page.
-                    window.location.reload();
+                    redirectAfterLogin(data);
                 })
                 .fail(function (xhr, textStatus, errorThrown) {
                     const data = xhr.responseJSON;
