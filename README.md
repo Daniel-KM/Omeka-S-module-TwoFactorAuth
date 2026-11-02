@@ -68,8 +68,9 @@ following placeholders are replaced:
 - `{token}`, `{code}`: generated token
 
 The mail is sent as UTF-8 with quoted-printable encoding, so accented characters
-are decoded properly by mail clients. Plain text and basic HTML bodies are
-supported: when the body starts with `<`, it is sent as HTML.
+are decoded properly by mail clients. The body is always sent as HTML: a plain
+text body keeps its line breaks. The values of the placeholders are escaped in
+the body, but not in the subject.
 
 
 TODO
@@ -142,7 +143,7 @@ This module was built for the [digital library of Maison de Salins].
 [Single Sign-On]: https://gitlab.com/Daniel-KM/Omeka-S-module-SingleSignOn
 [Lockout]: https://gitlab.com/Daniel-KM/Omeka-S-module-Lockout
 [installing a module]: https://omeka.org/s/docs/user-manual/modules
-[TwoFactorAuth.zip]: https://github.com/Daniel-KM/Omeka-S-module-TwoFactorAuth/releases
+[TwoFactorAuth.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-TwoFactorAuth/-/releases
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-TwoFactorAuth/issues
 [Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
