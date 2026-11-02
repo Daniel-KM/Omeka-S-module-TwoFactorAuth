@@ -93,7 +93,7 @@ class TwoFactorLoginTest extends TestCase
         $this->assertTrue($plugin->sendToken($token));
         $this->assertSame('[My Omeka] 123456', $captured->subject);
         $this->assertSame(
-            'Hi Alice (alice@example.org), code 123456 for My Omeka.',
+            '<div>Hi Alice (alice@example.org), code 123456 for My Omeka.</div>',
             $captured->body
         );
         $this->assertSame(['alice@example.org' => 'Alice'], $captured->to);
@@ -123,7 +123,7 @@ class TwoFactorLoginTest extends TestCase
 
         $plugin->sendToken($token);
         $this->assertSame('Code 42', $captured->subject);
-        $this->assertSame('User bob@example.org code 42', $captured->body);
+        $this->assertSame('<div>User bob@example.org code 42</div>', $captured->body);
     }
 
     public function testSendTokenReturnsFalseWhenEmailFails(): void
@@ -161,8 +161,63 @@ class TwoFactorLoginTest extends TestCase
 
         $plugin->sendToken($token);
         $this->assertSame(
-            'c@example.org|c@example.org|Carol|Carol|9|9',
+            '<div>c@example.org|c@example.org|Carol|Carol|9|9</div>',
             $captured->body
         );
+    }
+
+    public function testSendTokenWrapsBodyAsHtml(): void
+    {
+        $captured = (object) ['body' => null];
+        $sendEmail = $this->getMockBuilder(SendEmail::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['__invoke'])
+            ->getMock();
+        $sendEmail->method('__invoke')->willReturnCallback(
+            function ($body) use ($captured) {
+                $captured->body = $body;
+                return true;
+            }
+        );
+        $token = $this->makeToken('d@example.org', 'Dan', 7);
+
+        // A plain text body keeps its line breaks.
+        $plugin = $this->makePlugin($sendEmail, [
+            'twofactorauth_message_body' => "Hi {name},\nCode {code}",
+        ]);
+        $plugin->sendToken($token);
+        $this->assertSame("<div>Hi Dan,<br />\nCode 7</div>", $captured->body);
+
+        // A html body, even starting with a text, is kept as is.
+        $plugin = $this->makePlugin($sendEmail, [
+            'twofactorauth_message_body' => "Hi {name},<br>\nCode <b>{code}</b>",
+        ]);
+        $plugin->sendToken($token);
+        $this->assertSame("<div>Hi Dan,<br>\nCode <b>7</b></div>", $captured->body);
+    }
+
+    public function testSendTokenEscapesValuesInHtmlBodyOnly(): void
+    {
+        $captured = (object) ['body' => null, 'subject' => null];
+        $sendEmail = $this->getMockBuilder(SendEmail::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['__invoke'])
+            ->getMock();
+        $sendEmail->method('__invoke')->willReturnCallback(
+            function ($body, $subject) use ($captured) {
+                $captured->body = $body;
+                $captured->subject = $subject;
+                return true;
+            }
+        );
+        $token = $this->makeToken('e@example.org', 'Tom & <Jerry>', 8);
+
+        $plugin = $this->makePlugin($sendEmail, [
+            'twofactorauth_message_subject' => 'Code for {name}',
+            'twofactorauth_message_body' => 'Hi {name}, code {code}',
+        ]);
+        $plugin->sendToken($token);
+        $this->assertSame('<div>Hi Tom &amp; &lt;Jerry&gt;, code 8</div>', $captured->body);
+        $this->assertSame('Code for Tom & <Jerry>', $captured->subject);
     }
 }
