@@ -107,10 +107,13 @@ class TokenAdapter extends AbstractAdapter
                 ['User not found.']);
         }
 
-        // Normally, this check is done in the first step.
-        // It is a quick one anyway.
+        // Without second factor, the credential is the password: other modules
+        // authenticate through the service directly, without the first step.
         if (!$this->requireSecondFactor($user)) {
-            return new Result(Result::SUCCESS, $user);
+            return $this->realAdapter
+                ->setIdentity($this->identity)
+                ->setCredential($this->credential)
+                ->authenticate();
         }
 
         // Manage the second factor authentication.
