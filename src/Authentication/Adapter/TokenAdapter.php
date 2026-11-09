@@ -201,9 +201,10 @@ class TokenAdapter extends AbstractAdapter
 
     public function createToken(User $user): Token
     {
-        // Use a cryptographically secure PRNG. Range 1000-9999 guarantees four
-        // digits when stored and displayed as int (no leading zero truncation).
-        $code = random_int(1000, 9999);
+        // Use a cryptographically secure PRNG. Range 100000-999999 guarantees
+        // six digits when stored and displayed as int (no leading zero
+        // truncation).
+        $code = random_int(100000, 999999);
         $token = new Token();
         $token
             ->setUser($user)

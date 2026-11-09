@@ -9,7 +9,7 @@ Two-Factor Authentication (module for Omeka S)
 mechanism with a second step to log in with a numeric code sent to user email.
 
 The user can choose to enable it or not in the user settings, then a mail will
-be sent on log in with a four digits check code.
+be sent on log in with a six digits check code.
 
 The module is compatible with [Guest] and [User Names]. It is useless for other
 authentication mechanisms ([CAS], [LDAP] or [Single Sign-On]), because they
@@ -55,7 +55,7 @@ Quick start
 An checkbox in user settings allows to enable/disable the two-factor
 authentication.
 
-When enabled, a mail is sent to the user with a four digits check code, that
+When enabled, a mail is sent to the user with a six digits check code, that
 must be pasted in the form to log in.
 
 The subject and body of the mail can be customized in the module settings. The

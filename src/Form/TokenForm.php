@@ -22,7 +22,7 @@ class TokenForm extends Form
                     'id' => 'token_email',
                     'required' => true,
                     'min' => 0,
-                    'max' => 9999,
+                    'max' => 999999,
                     'step' => 1,
                 ],
             ])
