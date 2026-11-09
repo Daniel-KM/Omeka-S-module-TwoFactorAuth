@@ -393,6 +393,7 @@ class TwoFactorLogin extends AbstractPlugin
             'main_url' => $mainUrl,
             'site_title' => $siteTitle,
             'site_url' => $siteUrl,
+            ->setSecondStep(true)
             'email' => $user->getEmail(),
             'name' => $user->getName(),
             'user_email' => $user->getEmail(),

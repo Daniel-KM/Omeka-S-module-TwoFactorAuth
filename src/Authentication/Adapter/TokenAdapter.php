@@ -76,6 +76,11 @@ class TokenAdapter extends AbstractAdapter
      */
     protected $force2fa = false;
 
+    /**
+     * @var bool
+     */
+    protected $isSecondStep = false;
+
     public function __construct(
         AuthAdapterInterface $realAdapter,
         Connection $connection,
@@ -94,6 +99,18 @@ class TokenAdapter extends AbstractAdapter
         $this->userSettings = $userSettings;
         $this->expirationDuration = $expirationDuration;
         $this->force2fa = $force2fa;
+    }
+
+    /**
+     * The credential is the code only when the second step sets it.
+     *
+     * Other modules authenticate through the service directly with a password,
+     * so it should never be compared to the pending codes.
+     */
+    public function setSecondStep(bool $isSecondStep): self
+    {
+        $this->isSecondStep = $isSecondStep;
+        return $this;
     }
 
     public function authenticate()
@@ -117,6 +134,16 @@ class TokenAdapter extends AbstractAdapter
         }
 
         // Manage the second factor authentication.
+
+        $isSecondStep = $this->isSecondStep;
+        $this->isSecondStep = false;
+        if (!$isSecondStep) {
+            return new Result(
+                Result::FAILURE_CREDENTIAL_INVALID,
+                null,
+                ['This user requires a two-factor authentication.'] // @translate
+            );
+        }
 
         if (!$this->credential) {
             return new Result(

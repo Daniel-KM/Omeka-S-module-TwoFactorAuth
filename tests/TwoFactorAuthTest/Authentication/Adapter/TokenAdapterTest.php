@@ -36,4 +36,31 @@ class TokenAdapterTest extends AbstractHttpControllerTestCase
             ->authenticate();
         $this->assertTrue($result->isValid());
     }
+
+    public function testCodeIsAcceptedOnlyInTheSecondStep(): void
+    {
+        $adapter = $this->adapter();
+        $services = $this->getApplication()->getServiceManager();
+        $user = $adapter->getUserRepository()->findOneBy(['email' => 'admin@example.com']);
+        $userSettings = $services->get('Omeka\Settings\User');
+        $userSettings->set('twofactorauth_active', true, $user->getId());
+        try {
+            $code = (string) $adapter->createToken($user)->getCode();
+            $this->assertSame(6, strlen($code));
+
+            // Another module sends the code as a password.
+            $result = $adapter->setIdentity('admin@example.com')->setCredential($code)->authenticate();
+            $this->assertFalse($result->isValid());
+
+            // The password alone is not enough.
+            $result = $adapter->setIdentity('admin@example.com')->setCredential('root')->authenticate();
+            $this->assertFalse($result->isValid());
+
+            $result = $adapter->setSecondStep(true)->setIdentity('admin@example.com')->setCredential($code)->authenticate();
+            $this->assertTrue($result->isValid());
+        } finally {
+            $userSettings->set('twofactorauth_active', false, $user->getId());
+            $adapter->cleanTokens($user);
+        }
+    }
 }
