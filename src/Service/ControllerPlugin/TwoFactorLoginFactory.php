@@ -26,7 +26,8 @@ class TwoFactorLoginFactory implements FactoryInterface
             $services->get('Omeka\Settings\User'),
             $plugins->get('currentSite')(),
             $services->get('Config')['twofactorauth'],
-            class_exists('UserNames\Module')
+            class_exists('UserNames\Module'),
+            $services->has('Lockout\Lockout') ? $services->get('Lockout\Lockout') : null
         );
     }
 }

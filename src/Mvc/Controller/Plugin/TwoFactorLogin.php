@@ -99,6 +99,11 @@ class TwoFactorLogin extends AbstractPlugin
     protected $configModule;
 
     /**
+     * @var \Lockout\Stdlib\Lockout|null
+     */
+    protected $lockout;
+
+    /**
      * @var bool
      */
     protected $hasModuleUserNames;
@@ -117,7 +122,8 @@ class TwoFactorLogin extends AbstractPlugin
         UserSettings $userSettings,
         ?SiteRepresentation $site,
         array $configModule,
-        bool $hasModuleUserNames
+        bool $hasModuleUserNames,
+        $lockout = null
     ) {
         $this->authenticationService = $authenticationService;
         $this->entityManager = $entityManager;
@@ -133,6 +139,7 @@ class TwoFactorLogin extends AbstractPlugin
         $this->site = $site;
         $this->configModule = $configModule;
         $this->hasModuleUserNames = $hasModuleUserNames;
+        $this->lockout = $lockout;
     }
 
     public function __invoke(): self
@@ -215,6 +222,10 @@ class TwoFactorLogin extends AbstractPlugin
 
     public function validateLoginStep1(string $email, string $password): bool
     {
+        if ($this->isLockout()) {
+            return false;
+        }
+
         $user = $this->userFromEmail($email);
         if (!$user) {
             sleep(3);
@@ -222,6 +233,12 @@ class TwoFactorLogin extends AbstractPlugin
                 '[TwoFactorAuth] Login attempt on unknown identity: {email}.', // @translate
                 ['email' => $email]
             );
+            // Same message as a wrong password, so the accounts are not
+            // disclosed.
+            $this->messenger->addError(
+                'Email or password is invalid' // @translate
+            );
+            $this->lockoutFailure($email);
             return false;
         }
 
@@ -237,10 +254,40 @@ class TwoFactorLogin extends AbstractPlugin
             $this->messenger->addError(
                 'Email or password is invalid' // @translate
             );
+            $this->lockoutFailure($email);
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Check if the ip is locked out by the module Lockout.
+     */
+    protected function isLockout(): bool
+    {
+        if (!$this->lockout || !$this->lockout->isLockout()) {
+            return false;
+        }
+        $this->messenger->addError($this->lockout->errorMsg());
+        return true;
+    }
+
+    /**
+     * Count a failed attempt in the module Lockout.
+     */
+    protected function lockoutFailure(string $email): void
+    {
+        if (!$this->lockout) {
+            return;
+        }
+        $this->lockout->updateLockout($email);
+        $limit = $this->lockout->checkLimitLogin();
+        if ($limit === false) {
+            $this->messenger->addError($this->lockout->errorMsg());
+        } elseif (is_string($limit) && $limit !== '') {
+            $this->messenger->addWarning($limit);
+        }
     }
 
     /**
@@ -315,6 +362,10 @@ class TwoFactorLogin extends AbstractPlugin
             return null;
         }
 
+        if ($this->isLockout()) {
+            return null;
+        }
+
         // Block brute force: cap failed attempts per 2FA session. When the cap
         // is reached, drop the 2FA session so the user must re-authenticate
         // from step 1 (new token required).
@@ -342,6 +393,7 @@ class TwoFactorLogin extends AbstractPlugin
         /** @var \TwoFactorAuth\Authentication\Adapter\TokenAdapter $adapter */
         $adapter = $this->authenticationService->getAdapter();
         $adapter
+            ->setSecondStep(true)
             ->setIdentity($userEmail)
             // In second step, the 2fa token is the credential.
             ->setCredential($code);
@@ -349,6 +401,9 @@ class TwoFactorLogin extends AbstractPlugin
         // Here, use the authentication service.
         $result = $this->authenticationService->authenticate();
         if ($result->isValid()) {
+            if ($this->lockout) {
+                $this->lockout->resetLockout();
+            }
             $session->offsetUnset('tfa_attempts');
             $session->offsetUnset('tfa_last_sent');
             $this->messenger->clear();
@@ -360,6 +415,7 @@ class TwoFactorLogin extends AbstractPlugin
         // Slow down the process to mitigate online brute force attempts.
         sleep(3);
         $session->offsetSet('tfa_attempts', $attempts + 1);
+        $this->lockoutFailure($userEmail);
         $this->messenger->addError('Invalid code'); // @translate
         return false;
     }
@@ -393,7 +449,6 @@ class TwoFactorLogin extends AbstractPlugin
             'main_url' => $mainUrl,
             'site_title' => $siteTitle,
             'site_url' => $siteUrl,
-            ->setSecondStep(true)
             'email' => $user->getEmail(),
             'name' => $user->getName(),
             'user_email' => $user->getEmail(),
