@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 00:00+0000\n"
+"POT-Creation-Date: 2026-11-09 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,48 +54,52 @@ msgstr ""
 msgid "Log in (2FA)"
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:222
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:233
 msgid "[TwoFactorAuth] Login attempt on unknown identity: {email}."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:257
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:304
 msgid "An error occurred when the code was sent by email. Try again later."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:260
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:307
 msgid "[TwoFactorAuth] An error occurred when the code was sent by email."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:281
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:328
 msgid "Fill the second form with the code received by email to log in"
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:298
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:345
 msgid "The code is missing."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:313
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:360
 msgid "An error occurred. Retry to log in."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:333
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:384
 msgid ""
 "[TwoFactorAuth] Too many invalid codes for {email}. 2FA session invalidated."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:337
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:388
 msgid "Too many invalid codes. Retry to log in."
 msgstr ""
 
-#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:425
+#: src/Mvc/Controller/Plugin/TwoFactorLogin.php:481
 msgid "Error when sending 2FA token email to {email}."
 msgstr ""
 
-#: src/Authentication/Adapter/TokenAdapter.php:122
+#: src/Authentication/Adapter/TokenAdapter.php:144
+msgid "This user requires a two-factor authentication."
+msgstr ""
+
+#: src/Authentication/Adapter/TokenAdapter.php:152
 msgid "Missing two-factor authentication code."
 msgstr ""
 
-#: src/Authentication/Adapter/TokenAdapter.php:138
+#: src/Authentication/Adapter/TokenAdapter.php:168
 msgid "Invalid or expired code."
 msgstr ""
 
