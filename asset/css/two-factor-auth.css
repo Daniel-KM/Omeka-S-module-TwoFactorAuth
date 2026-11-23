@@ -6,27 +6,11 @@
         display: none;
     }
 
-    .dialog-header,
-    .dialog-contents,
     .dialog-bottom {
         margin-bottom: 6px;
     }
 
-    .dialog-header {
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .dialog-header-close-button {
-        display: block;
-        margin-left: auto;
-        padding: 0;
-        background-color: transparent;
-        border: none;
-        box-shadow: none;
-    }
-
-    /* Busy button: disabled, with a spinner at the left of the label. The
+    /* Busy button: disabled, with a spinner at the right of the label. The
     spinner is always present, but invisible, so the button is never resized. */
     .is-busy {
         pointer-events: none;
@@ -35,10 +19,8 @@
         visibility: hidden;
     }
     button .spinner,
-    a .spinner {
-        margin-right: 0.5em;
-    }
-    span.spinner + input {
+    a .spinner,
+    input + span.spinner {
         margin-left: 0.5em;
     }
 

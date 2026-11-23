@@ -15,6 +15,7 @@ $headLink = $plugins->get('headLink');
 $headScript = $plugins->get('headScript');
 
 $headLink
+    ->appendStylesheet($assetUrl($this->status()->isAdminRequest() ? 'css/common-dialog-admin.css' : 'css/common-dialog.css', 'Common'))
     ->appendStylesheet($assetUrl('css/two-factor-auth.css', 'TwoFactorAuth'));
 $headScript
     ->appendFile($assetUrl('js/two-factor-auth.js', 'TwoFactorAuth'), 'text/javascript', ['defer' => 'defer']);

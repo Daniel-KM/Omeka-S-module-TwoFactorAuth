@@ -10,23 +10,23 @@
         /**
          * Get or create the spinner of a button, hidden by default.
          *
-         * The spinner is prepended inside a button or a link, and inserted
-         * before an input, that cannot contain an element. It is created on
-         * load, so it takes its place and the button is not resized when busy.
+         * The spinner is appended inside a button or a link, and inserted after
+         * an input, that cannot contain an element. It is created on load, so
+         * it takes its place and the button is not resized when busy.
          */
         const spinnerOf = function (element) {
             const button = $(element);
             const isInput = button.is('input');
-            let spinner = isInput ? button.prev('span.spinner') : button.children('span.spinner');
+            let spinner = isInput ? button.next('span.spinner') : button.children('span.spinner');
             if (!spinner.length) {
                 spinner = $('<span class="spinner fas fa-sync" aria-hidden="true"></span>');
-                isInput ? spinner.insertBefore(button) : spinner.prependTo(button);
+                isInput ? spinner.insertAfter(button) : spinner.appendTo(button);
             }
             return spinner;
         };
 
         /**
-         * Disable the button and display the spinner at the left of its label.
+         * Disable the button and display the spinner at the right of its label.
          */
         const beforeSpin = function (element) {
             spinnerOf(element).addClass('fa-spin');
