@@ -26,15 +26,12 @@ class TokenForm extends Form
                     'step' => 1,
                 ],
             ])
+            // A submit input, not a button, has no field label in the form.
             ->add([
                 'name' => 'submit_token',
-                'type' => Element\Button::class,
-                'options' => [
-                    'label' => 'Submit', // @translate
-                ],
+                'type' => Element\Submit::class,
                 'attributes' => [
-                    'type' => 'submit',
-                    'value' => 'Submit',
+                    'value' => 'Submit', // @translate
                 ],
             ])
         ;
