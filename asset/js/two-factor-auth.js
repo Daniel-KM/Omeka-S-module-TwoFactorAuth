@@ -1,7 +1,7 @@
 'use strict';
 
 (function ($) {
-    $(document).ready(function() {
+    $(function() {
 
         /**
          * @see ContactUs, Guest, SearchHistory, Selection, TwoFactorAuth.
@@ -170,6 +170,10 @@
                         dialogMessage(msg ? msg : Omeka.jsTranslate('Check input'), true);
                         return;
                     }
+                    // The dialog is added after the load, so prepare its spinners now.
+                    $(dialog).find('#login-token-form [type=submit], .resend-code').each(function () {
+                        spinnerOf(this);
+                    });
                     dialog.showModal();
                     $(dialog).trigger('o:dialog-opened');
                 })
